@@ -1,0 +1,20 @@
+# Build
+build/
+out/
+
+# VS Code
+.vscode/extensions.json
+
+# VS
+.vs/
+
+# Compiled
+*.exe
+*.obj
+*.ilk
+*.pdb
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
