@@ -57,7 +57,7 @@ int main(){
 
     Caliber::VertexArray vao;
     vao.bind();
-    
+
     Caliber::VertexBuffer vbo(vertices , sizeof(vertices));
     vbo.bind();
 
@@ -67,8 +67,9 @@ int main(){
     vao.addAttribute(0, 3, 3 * sizeof(float), 0);
 
 
-    // Shader 
+    // ------------------- SHADER ------------------ 
     Caliber::Shader shader("shaders/basic.vert" , "shaders/basic.frag");
+    
 
     // Main Loop
     while(!glfwWindowShouldClose(window)){
