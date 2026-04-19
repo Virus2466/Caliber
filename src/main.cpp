@@ -1,3 +1,4 @@
+#include <cstdint>
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
 #include<iostream>
@@ -5,12 +6,17 @@
 
 
 #include "renderer/Shader.h"
+#include "renderer/Buffer.h"
 
 // Triangle Vertices (x , y ,z)
 static float vertices[] = {
     -0.5f , -0.5f , 0.0f,
     0.5f , -0.5f , 0.0f,
     0.0f , 0.5f , 0.0f
+};
+
+static uint32_t indices[] = {
+    0 , 1, 2
 };
 
 
@@ -45,19 +51,21 @@ int main(){
     std::cout << "OpenGL " << glGetString(GL_VERSION) << "\n";
     std::cout << "Caliber Running...\n";
 
-    // GPU Buffers
-    uint32_t VAO , VBO;
-    glGenVertexArrays(1,&VAO);
-    glGenBuffers(1, &VBO);
+    //         ********
+    // ------ GPU Buffers --------
+    //         ********
 
-    glBindVertexArray(VAO);
+    Caliber::VertexArray vao;
+    vao.bind();
+    
+    Caliber::VertexBuffer vbo(vertices , sizeof(vertices));
+    vbo.bind();
 
-    glBindBuffer(GL_ARRAY_BUFFER , VBO);
-    glBufferData(GL_ARRAY_BUFFER , sizeof(vertices) , vertices , GL_STATIC_DRAW);
+    Caliber::IndexBuffer ibo(indices , 3);
+    ibo.bind();
 
-    // Tell openGL how to read the vertex data
-    glVertexAttribPointer(0,3,GL_FLOAT, GL_FALSE , 3 * sizeof(float) , (void*)0);
-    glEnableVertexAttribArray(0);
+    vao.addAttribute(0, 3, 3 * sizeof(float), 0);
+
 
     // Shader 
     Caliber::Shader shader("shaders/basic.vert" , "shaders/basic.frag");
@@ -68,8 +76,8 @@ int main(){
         glClear(GL_COLOR_BUFFER_BIT);
 
         shader.bind();
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES , 0 ,3);
+        vao.bind();
+        glDrawElements(GL_TRIANGLES , ibo.getCount() ,GL_UNSIGNED_INT , 0);
 
 
         glfwSwapBuffers(window);
@@ -77,8 +85,6 @@ int main(){
     }
 
     // Cleanup
-    glDeleteVertexArrays(1,&VAO);
-    glDeleteBuffers(1,&VBO);
     glfwTerminate();
 
     return 0;
