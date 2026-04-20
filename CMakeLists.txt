@@ -14,7 +14,8 @@ add_executable(Caliber
     external/glad/src/glad.c
     src/renderer/Shader.h
     src/core/Types.h
-    src/renderer/Buffer.cpp    # GLAD compiled directly with project
+    src/renderer/Buffer.cpp
+    src/scene/Camera.cpp    # GLAD compiled directly with project
 )
 
 # ── Include Directories ───────────────────────────────────────
