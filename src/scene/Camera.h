@@ -32,7 +32,7 @@
 
             // Passing intp the shader
             [[nodiscard]] glm::mat4 getViewMatrix() const;
-            [[nodiscard]] glm::mat4 getProjectMatrix(float aspectRatio) const;
+            [[nodiscard]] glm::mat4 getProjectionMatrix(float aspectRatio) const;
 
 
 
@@ -42,8 +42,6 @@
             glm::vec3 m_up;
             glm::vec3 m_right;
             
-
-            float m_movementSpeed;
             float m_yaw;
             float m_pitch;
             float m_speed;
