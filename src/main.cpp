@@ -4,9 +4,13 @@
 #include<iostream>
 
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 
 #include "renderer/Shader.h"
 #include "renderer/Buffer.h"
+#include "scene/Camera.h"
 
 // Triangle Vertices (x , y ,z)
 static float vertices[] = {
@@ -18,6 +22,44 @@ static float vertices[] = {
 static uint32_t indices[] = {
     0 , 1, 2
 };
+
+
+
+
+// ------------------- MOUSEEE ------------------ 
+static float s_lastX = 640.0f;
+static float s_lastY = 360.0f;
+static bool s_firstMouse = true;
+
+Caliber::Camera camera(glm::vec3(0.0f , 0.0f , 3.0f));
+
+
+// ------------------- MOUSE CALLBACK------------------ 
+void mouseCallBack(GLFWwindow* , double xpos , double ypos){
+    if(s_firstMouse){
+        s_lastX = xpos;
+        s_lastY = ypos;
+        s_firstMouse = false;
+    }
+
+    float xOffset = (xpos - s_lastX);
+    float yOffset = -(ypos - s_lastY) ; // inverted
+    s_lastX = xpos;
+    s_lastY = ypos;
+    
+    camera.processMouse(xOffset,  yOffset);
+
+}
+
+void scrollCallBack(GLFWwindow* , double , double yOffset){
+    camera.processScroll(static_cast<float>(yOffset));
+}
+
+
+
+
+
+
 
 
 int main(){
@@ -48,6 +90,14 @@ int main(){
         return -1;
     }
 
+
+    // caputring mouse
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPosCallback(window, mouseCallBack);
+    glfwSetScrollCallback(window, scrollCallBack);
+
+
+
     std::cout << "OpenGL " << glGetString(GL_VERSION) << "\n";
     std::cout << "Caliber Running...\n";
 
@@ -70,13 +120,38 @@ int main(){
     // ------------------- SHADER ------------------ 
     Caliber::Shader shader("shaders/basic.vert" , "shaders/basic.frag");
     
+    // Delta Time
+    float lastFrame = 0.0f;
+
 
     // Main Loop
     while(!glfwWindowShouldClose(window)){
+        float currentFrame = static_cast<float>(glfwGetTime());
+        float deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
+
+        // INPUT
+        camera.processKeyboard(window, deltaTime);
+        if(glfwGetKey(window , GLFW_KEY_ESCAPE) == GLFW_PRESS){
+            glfwSetWindowShouldClose(window, true);
+        }
+
         glClearColor(0.1f,0.1f,0.1f,1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+
+        // matrices
+        glm::mat4 model = glm::mat4(1.0f);
+        glm::mat4 view = camera.getViewMatrix();
+        glm::mat4 projection = camera.getProjectionMatrix(1280.0f/720.0f);
+
         shader.bind();
+        shader.setMat4("u_model", model);
+        shader.setMat4("u_view", view);
+        shader.setMat4("u_projection", projection);
+
+
         vao.bind();
         glDrawElements(GL_TRIANGLES , ibo.getCount() ,GL_UNSIGNED_INT , 0);
 
