@@ -14,13 +14,25 @@
 
 // Triangle Vertices (x , y ,z)
 static float vertices[] = {
-    -0.5f , -0.5f , 0.0f,
-    0.5f , -0.5f , 0.0f,
-    0.0f , 0.5f , 0.0f
+    // back face
+    -0.5f, -0.5f, -0.5f,
+     0.5f, -0.5f, -0.5f,
+     0.5f,  0.5f, -0.5f,
+    -0.5f,  0.5f, -0.5f,
+    // front face
+    -0.5f, -0.5f,  0.5f,
+     0.5f, -0.5f,  0.5f,
+     0.5f,  0.5f,  0.5f,
+    -0.5f,  0.5f,  0.5f
 };
 
 static uint32_t indices[] = {
-    0 , 1, 2
+    0, 1, 2,  2, 3, 0,   // back
+    4, 5, 6,  6, 7, 4,   // front
+    0, 4, 7,  7, 3, 0,   // left
+    1, 5, 6,  6, 2, 1,   // right
+    3, 7, 6,  6, 2, 3,   // top
+    0, 4, 5,  5, 1, 0    // bottom
 };
 
 
@@ -89,6 +101,7 @@ int main(){
         std::cerr << "Failed to initialize GLAD\n";
         return -1;
     }
+    glEnable(GL_DEPTH_TEST);
 
 
     // caputring mouse
@@ -111,7 +124,7 @@ int main(){
     Caliber::VertexBuffer vbo(vertices , sizeof(vertices));
     vbo.bind();
 
-    Caliber::IndexBuffer ibo(indices , 3);
+    Caliber::IndexBuffer ibo(indices , 36);
     ibo.bind();
 
     vao.addAttribute(0, 3, 3 * sizeof(float), 0);
@@ -125,40 +138,40 @@ int main(){
 
 
     // Main Loop
-    while(!glfwWindowShouldClose(window)){
-        float currentFrame = static_cast<float>(glfwGetTime());
-        float deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
+    while (!glfwWindowShouldClose(window)) {
+    float currentFrame = static_cast<float>(glfwGetTime());
+    float deltaTime    = currentFrame - lastFrame;
+    lastFrame          = currentFrame;
 
+    // input
+    camera.processKeyboard(window, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
 
-        // INPUT
-        camera.processKeyboard(window, deltaTime);
-        if(glfwGetKey(window , GLFW_KEY_ESCAPE) == GLFW_PRESS){
-            glfwSetWindowShouldClose(window, true);
-        }
+    // clear BOTH buffers at the TOP
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glClearColor(0.1f,0.1f,0.1f,1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+    // rotate FIRST then upload
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::rotate(model,
+                        static_cast<float>(glfwGetTime()),
+                        glm::vec3(0.5f, 1.0f, 0.0f));
 
+    glm::mat4 view       = camera.getViewMatrix();
+    glm::mat4 projection = camera.getProjectionMatrix(1280.0f / 720.0f);
 
-        // matrices
-        glm::mat4 model = glm::mat4(1.0f);
-        glm::mat4 view = camera.getViewMatrix();
-        glm::mat4 projection = camera.getProjectionMatrix(1280.0f/720.0f);
+    shader.bind();
+    shader.setMat4("u_model",      model);
+    shader.setMat4("u_view",       view);
+    shader.setMat4("u_projection", projection);
 
-        shader.bind();
-        shader.setMat4("u_model", model);
-        shader.setMat4("u_view", view);
-        shader.setMat4("u_projection", projection);
+    vao.bind();
+    glDrawElements(GL_TRIANGLES, ibo.getCount(), GL_UNSIGNED_INT, 0);
 
-
-        vao.bind();
-        glDrawElements(GL_TRIANGLES , ibo.getCount() ,GL_UNSIGNED_INT , 0);
-
-
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-    }
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+}
 
     // Cleanup
     glfwTerminate();
