@@ -12,27 +12,51 @@
 #include "renderer/Buffer.h"
 #include "scene/Camera.h"
 
-// Triangle Vertices (x , y ,z)
+
+
+// (TODO) : Fix the clutter down below and keep all the necessary variables here..
+
+
+
+
+
+
+
+// (LATER ADD ) : Maybe we can shift all the vertices in some file to cleanup the main file ????
+// Vertices (x , y ,z)
 static float vertices[] = {
     // back face
-    -0.5f, -0.5f, -0.5f,
-     0.5f, -0.5f, -0.5f,
-     0.5f,  0.5f, -0.5f,
-    -0.5f,  0.5f, -0.5f,
+    -0.5f, -0.5f, -0.5f,    0.0f,  0.0f, -1.0f,
+    0.5f, -0.5f, -0.5f,     0.0f,  0.0f, -1.0f,
+    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+    -0.5f,  0.5f, -0.5f, 0.0f,  0.0f, -1.0f,
     // front face
-    -0.5f, -0.5f,  0.5f,
-     0.5f, -0.5f,  0.5f,
-     0.5f,  0.5f,  0.5f,
-    -0.5f,  0.5f,  0.5f
+    -0.5f, -0.5f,  0.5f, 0.0f,  0.0f,  1.0f,
+    0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+    -0.5f,  0.5f,  0.5f, 0.0f,  0.0f,  1.0f,
+
+    // Left face  (normal points toward -X)
+    -0.5f, -0.5f, -0.5f,  -1.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f, -0.5f,  -1.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f,  -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f,  -1.0f,  0.0f,  0.0f,
+
+    // Bottom face (normal points toward -Y)
+    -0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,
+    0.5f, -0.5f, -0.5f,    0.0f, -1.0f,  0.0f,
+    0.5f, -0.5f,  0.5f,    0.0f, -1.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,
+
 };
 
 static uint32_t indices[] = {
-    0, 1, 2,  2, 3, 0,   // back
-    4, 5, 6,  6, 7, 4,   // front
-    0, 4, 7,  7, 3, 0,   // left
-    1, 5, 6,  6, 2, 1,   // right
-    3, 7, 6,  6, 2, 3,   // top
-    0, 4, 5,  5, 1, 0    // bottom
+    0,  1,  2,      2,  3,  0,   // back
+    4,  5,  6,      6,  7,  4,   // front
+    8,  9, 10,   10, 11,  8,   // left
+    12, 13, 14,  14, 15, 12,   // right
+    16, 17, 18,  18, 19, 16,   // top
+    20, 21, 22,  22, 23, 20,   // bottom
 };
 
 
@@ -127,7 +151,8 @@ int main(){
     Caliber::IndexBuffer ibo(indices , 36);
     ibo.bind();
 
-    vao.addAttribute(0, 3, 3 * sizeof(float), 0);
+    vao.addAttribute(0, 3, 6 * sizeof(float), 0);
+    vao.addAttribute(1, 3, 6 * sizeof(float), 3 * sizeof(float));
 
 
     // ------------------- SHADER ------------------ 
