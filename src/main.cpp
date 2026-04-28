@@ -8,6 +8,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 
+#include "glm/fwd.hpp"
 #include "renderer/Shader.h"
 #include "renderer/Buffer.h"
 #include "scene/Camera.h"
@@ -26,28 +27,40 @@
 // Vertices (x , y ,z)
 static float vertices[] = {
     // back face
-    -0.5f, -0.5f, -0.5f,    0.0f,  0.0f, -1.0f,
-    0.5f, -0.5f, -0.5f,     0.0f,  0.0f, -1.0f,
-    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-    -0.5f,  0.5f, -0.5f, 0.0f,  0.0f, -1.0f,
-    // front face
-    -0.5f, -0.5f,  0.5f, 0.0f,  0.0f,  1.0f,
-    0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-    -0.5f,  0.5f,  0.5f, 0.0f,  0.0f,  1.0f,
+    -0.5f, -0.5f, -0.5f,   0.0f,  0.0f, -1.0f,
+     0.5f, -0.5f, -0.5f,   0.0f,  0.0f, -1.0f,
+     0.5f,  0.5f, -0.5f,   0.0f,  0.0f, -1.0f,
+    -0.5f,  0.5f, -0.5f,   0.0f,  0.0f, -1.0f,
 
-    // Left face  (normal points toward -X)
+    // front face
+    -0.5f, -0.5f,  0.5f,   0.0f,  0.0f,  1.0f,
+     0.5f, -0.5f,  0.5f,   0.0f,  0.0f,  1.0f,
+     0.5f,  0.5f,  0.5f,   0.0f,  0.0f,  1.0f,
+    -0.5f,  0.5f,  0.5f,   0.0f,  0.0f,  1.0f,
+
+    // left face
     -0.5f, -0.5f, -0.5f,  -1.0f,  0.0f,  0.0f,
     -0.5f,  0.5f, -0.5f,  -1.0f,  0.0f,  0.0f,
     -0.5f,  0.5f,  0.5f,  -1.0f,  0.0f,  0.0f,
     -0.5f, -0.5f,  0.5f,  -1.0f,  0.0f,  0.0f,
 
-    // Bottom face (normal points toward -Y)
-    -0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,
-    0.5f, -0.5f, -0.5f,    0.0f, -1.0f,  0.0f,
-    0.5f, -0.5f,  0.5f,    0.0f, -1.0f,  0.0f,
-    -0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,
+    // right face          ← ADD THIS
+     0.5f, -0.5f, -0.5f,   1.0f,  0.0f,  0.0f,
+     0.5f,  0.5f, -0.5f,   1.0f,  0.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,   1.0f,  0.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,   1.0f,  0.0f,  0.0f,
 
+    // top face             ← ADD THIS
+    -0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,
+     0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,
+
+    // bottom face
+    -0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,
+     0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,
 };
 
 static uint32_t indices[] = {
@@ -74,6 +87,7 @@ Caliber::Camera camera(glm::vec3(0.0f , 0.0f , 3.0f));
 void mouseCallBack(GLFWwindow* , double xpos , double ypos){
     if(s_firstMouse){
         s_lastX = xpos;
+    
         s_lastY = ypos;
         s_firstMouse = false;
     }
@@ -126,6 +140,7 @@ int main(){
         return -1;
     }
     glEnable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
 
 
     // caputring mouse
@@ -161,6 +176,8 @@ int main(){
     // Delta Time
     float lastFrame = 0.0f;
 
+    glm::vec3 lightPos(1.2f , 1.0f , 2.0f);
+
 
     // Main Loop
     while (!glfwWindowShouldClose(window)) {
@@ -190,6 +207,10 @@ int main(){
     shader.setMat4("u_model",      model);
     shader.setMat4("u_view",       view);
     shader.setMat4("u_projection", projection);
+    shader.setVec3("u_lightPos", lightPos);
+    shader.setVec3("u_lightColor", glm::vec3(1.0f , 1.0f , 1.0f));
+    shader.setVec3("u_objectColor", glm::vec3(1.0f , 0.5f , 0.2f));
+    shader.setVec3("u_viewPos", camera.getPosition());
 
     vao.bind();
     glDrawElements(GL_TRIANGLES, ibo.getCount(), GL_UNSIGNED_INT, 0);
