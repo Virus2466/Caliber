@@ -9,6 +9,7 @@
 
 
 #include "glm/fwd.hpp"
+#include "glm/trigonometric.hpp"
 #include "renderer/Shader.h"
 #include "renderer/Buffer.h"
 #include "scene/Camera.h"
@@ -176,10 +177,10 @@ int main(){
     // Delta Time
     float lastFrame = 0.0f;
 
-    glm::vec3 lightPos(1.2f , 1.0f , 2.0f);
 
-
-    // Main Loop
+    //-----------------------------------------------
+    // ----------------Main Loop---------------------
+    //-----------------------------------------------
     while (!glfwWindowShouldClose(window)) {
     float currentFrame = static_cast<float>(glfwGetTime());
     float deltaTime    = currentFrame - lastFrame;
@@ -204,19 +205,49 @@ int main(){
     glm::mat4 projection = camera.getProjectionMatrix(1280.0f / 720.0f);
 
     shader.bind();
+    // Direction Light(Theeee SUN)
+    shader.setVec3("u_dirLight.direction", glm::vec3(-0.2f , -1.0f, 0.3f));
+    shader.setVec3("u_dirLight.ambient", glm::vec3(0.05f, 0.05f , 0.05f));
+    shader.setVec3("u_dirLight.diffuse", glm::vec3(0.4f, 0.4f , 0.4f));
+    shader.setVec3("u_dirLight.specular", glm::vec3(0.5f, 0.5f , 0.5f));
+
+    // Point Light
+    shader.setVec3("u_pointLight.position" , glm::vec3(1.2f, 1.0f , 2.0f));
+    shader.setVec3("u_pointLight.ambient" , glm::vec3(0.05f, 0.05f , 0.05f));
+    shader.setVec3("u_pointLight.diffuse" , glm::vec3(0.8f, 0.8f , 0.8f));
+    shader.setVec3("u_pointLight.specular" , glm::vec3(1.0f, 1.0f , 1.0f));
+    shader.setFloat("u_pointLight.constant", 1.0f);
+    shader.setFloat("u_pointLight.linear", 0.09f);
+    shader.setFloat("u_pointLight.quadratic", 0.032f);
+
+    // Spotlight(follows the camera)
+    shader.setVec3("u_spotLight.position" , camera.getPosition());
+    shader.setVec3("u_spotLight.direction", camera.getFront());
+    shader.setVec3("u_spotLight.ambient",glm::vec3(0.0f,0.0f,0.0f));
+    shader.setVec3("u_spotLight.diffuse",glm::vec3(1.0f,1.0f,1.0f));
+    shader.setVec3("u_spotLight.specular",glm::vec3(1.0f,1.0f,1.0f));
+    shader.setFloat("u_spotLight.constant",1.0f);
+    shader.setFloat("u_spotLight.linear",0.09f);
+    shader.setFloat("u_spotLight.quadratic",0.032f);
+    shader.setFloat("u_spotLight.cutOff",glm::cos(glm::radians(12.5f)));
+    shader.setFloat("u_spotLight.outerCutOff",glm::cos(glm::radians(15.0f)));
+
+
+
     shader.setMat4("u_model",      model);
     shader.setMat4("u_view",       view);
     shader.setMat4("u_projection", projection);
-    shader.setVec3("u_lightPos", lightPos);
-    shader.setVec3("u_lightColor", glm::vec3(1.0f , 1.0f , 1.0f));
-    shader.setVec3("u_objectColor", glm::vec3(1.0f , 0.5f , 0.2f));
+    shader.setVec3("u_objectColor", glm::vec3(1.0f, 0.5f, 0.2f));
     shader.setVec3("u_viewPos", camera.getPosition());
 
     vao.bind();
     glDrawElements(GL_TRIANGLES, ibo.getCount(), GL_UNSIGNED_INT, 0);
 
+
+     // ... rendering code ...
     glfwSwapBuffers(window);
     glfwPollEvents();
+        
 }
 
     // Cleanup

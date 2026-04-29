@@ -34,6 +34,7 @@
             [[nodiscard]] glm::mat4 getViewMatrix() const;
             [[nodiscard]] glm::mat4 getProjectionMatrix(float aspectRatio) const;
             [[nodiscard]] glm::vec3 getPosition() const {return m_position;}
+            [[nodiscard]] glm::vec3 getFront() const {return m_front;}
 
 
 

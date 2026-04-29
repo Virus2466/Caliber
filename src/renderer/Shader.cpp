@@ -86,6 +86,10 @@ namespace Caliber{
         std::stringstream ss;
         ss << file.rdbuf();
         return ss.str();
+
+        // // temp debug 
+        // std::cerr << "[SHADER] Loaded : " << path << " (" << content.size() << "bytes)\n";
+        // return content;
     }
 
 
