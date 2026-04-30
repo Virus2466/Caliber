@@ -39,7 +39,30 @@ find_package(OpenGL REQUIRED)
 target_link_libraries(Caliber PRIVATE
     OpenGL::GL
     glfw
+    ImGui
 )
+
+# ── ImGui ─────────────────────────────────────────────────────
+set(IMGUI_DIR external/imgui)
+
+add_library(ImGui STATIC
+    ${IMGUI_DIR}/imgui.cpp
+    ${IMGUI_DIR}/imgui_draw.cpp
+    ${IMGUI_DIR}/imgui_tables.cpp
+    ${IMGUI_DIR}/imgui_widgets.cpp
+    ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
+    ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+)
+
+target_include_directories(ImGui PUBLIC
+    ${IMGUI_DIR}
+    ${IMGUI_DIR}/backends
+    external/glfw/include
+)
+
+
+
+
 
 # ── Warnings ──────────────────────────────────────────────────
 target_compile_options(Caliber PRIVATE
@@ -52,3 +75,4 @@ add_custom_command(TARGET Caliber POST_BUILD
     ${CMAKE_SOURCE_DIR}/shaders
     $<TARGET_FILE_DIR:Caliber>/shaders
 )
+
