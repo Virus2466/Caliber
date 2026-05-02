@@ -10,6 +10,7 @@ namespace Caliber{
         ImGui::CreateContext();
 
         ImGuiIO& io = ImGui::GetIO();
+        io.MouseDrawCursor = false;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
         // dark theme maybe change it later

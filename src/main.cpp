@@ -1,30 +1,19 @@
 #include <cstdint>
-#include<glad/glad.h>
-#include<GLFW/glfw3.h>
-#include<iostream>
-
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <iostream>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
-
 #include "glm/fwd.hpp"
 #include "glm/trigonometric.hpp"
+
 #include "renderer/Shader.h"
 #include "renderer/Buffer.h"
 #include "scene/Camera.h"
+#include "core/UI.h"
+#include <imgui.h>
 
-
-
-// (TODO) : Fix the clutter down below and keep all the necessary variables here..
-
-
-
-
-
-
-
-// (LATER ADD ) : Maybe we can shift all the vertices in some file to cleanup the main file ????
 // Vertices (x , y ,z)
 static float vertices[] = {
     // back face
@@ -45,13 +34,13 @@ static float vertices[] = {
     -0.5f,  0.5f,  0.5f,  -1.0f,  0.0f,  0.0f,
     -0.5f, -0.5f,  0.5f,  -1.0f,  0.0f,  0.0f,
 
-    // right face          ← ADD THIS
+    // right face
      0.5f, -0.5f, -0.5f,   1.0f,  0.0f,  0.0f,
      0.5f,  0.5f, -0.5f,   1.0f,  0.0f,  0.0f,
      0.5f,  0.5f,  0.5f,   1.0f,  0.0f,  0.0f,
      0.5f, -0.5f,  0.5f,   1.0f,  0.0f,  0.0f,
 
-    // top face             ← ADD THIS
+    // top face
     -0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,
      0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,
      0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,
@@ -73,48 +62,40 @@ static uint32_t indices[] = {
     20, 21, 22,  22, 23, 20,   // bottom
 };
 
-
-
-
-// ------------------- MOUSEEE ------------------ 
+// ------------------- MOUSE STATE ------------------ 
 static float s_lastX = 640.0f;
 static float s_lastY = 360.0f;
 static bool s_firstMouse = true;
+static bool s_cursorCaptured = true; 
 
 Caliber::Camera camera(glm::vec3(0.0f , 0.0f , 3.0f));
 
-
-// ------------------- MOUSE CALLBACK------------------ 
-void mouseCallBack(GLFWwindow* , double xpos , double ypos){
-    if(s_firstMouse){
-        s_lastX = xpos;
+// ------------------- CALLBACKS ------------------ 
+void mouseCallBack(GLFWwindow*, double xpos , double ypos){
+    if(!s_cursorCaptured) return;
     
-        s_lastY = ypos;
+    if(s_firstMouse){
+        s_lastX = static_cast<float>(xpos);
+        s_lastY = static_cast<float>(ypos);
         s_firstMouse = false;
     }
 
-    float xOffset = (xpos - s_lastX);
-    float yOffset = -(ypos - s_lastY) ; // inverted
-    s_lastX = xpos;
-    s_lastY = ypos;
+    float xOffset = static_cast<float>(xpos) - s_lastX;
+    float yOffset = s_lastY - static_cast<float>(ypos); // inverted
+    s_lastX = static_cast<float>(xpos);
+    s_lastY = static_cast<float>(ypos);
     
-    camera.processMouse(xOffset,  yOffset);
-
+    camera.processMouse(xOffset, yOffset);
 }
 
-void scrollCallBack(GLFWwindow* , double , double yOffset){
+void scrollCallBack(GLFWwindow*, double, double yOffset){
+    if(!s_cursorCaptured) return; 
     camera.processScroll(static_cast<float>(yOffset));
 }
 
-
-
-
-
-
-
-
+// ------------------- MAIN ------------------ 
 int main(){
-    // Initialzing GLFW
+    // Initialize GLFW
     if(!glfwInit()){
         std::cerr << "Failed to initiate GLFW\n";
         return -1;
@@ -143,116 +124,150 @@ int main(){
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 
-
-    // caputring mouse
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, mouseCallBack);
     glfwSetScrollCallback(window, scrollCallBack);
 
-
+    Caliber::UI::init(window);
 
     std::cout << "OpenGL " << glGetString(GL_VERSION) << "\n";
     std::cout << "Caliber Running...\n";
 
-    //         ********
-    // ------ GPU Buffers --------
-    //         ********
+    { // [FIX 2]: Added scope block to ensure all OpenGL objects are destroyed before glfwTerminate()
 
-    Caliber::VertexArray vao;
-    vao.bind();
+        // ------------------- GPU Buffers ------------------ 
+        Caliber::VertexArray vao;
+        vao.bind();
 
-    Caliber::VertexBuffer vbo(vertices , sizeof(vertices));
-    vbo.bind();
+        Caliber::VertexBuffer vbo(vertices , sizeof(vertices));
+        vbo.bind();
 
-    Caliber::IndexBuffer ibo(indices , 36);
-    ibo.bind();
+        Caliber::IndexBuffer ibo(indices , 36);
+        ibo.bind();
 
-    vao.addAttribute(0, 3, 6 * sizeof(float), 0);
-    vao.addAttribute(1, 3, 6 * sizeof(float), 3 * sizeof(float));
+        vao.addAttribute(0, 3, 6 * sizeof(float), 0);
+        vao.addAttribute(1, 3, 6 * sizeof(float), 3 * sizeof(float));
 
-
-    // ------------------- SHADER ------------------ 
-    Caliber::Shader shader("shaders/basic.vert" , "shaders/basic.frag");
-    
-    // Delta Time
-    float lastFrame = 0.0f;
-
-
-    //-----------------------------------------------
-    // ----------------Main Loop---------------------
-    //-----------------------------------------------
-    while (!glfwWindowShouldClose(window)) {
-    float currentFrame = static_cast<float>(glfwGetTime());
-    float deltaTime    = currentFrame - lastFrame;
-    lastFrame          = currentFrame;
-
-    // input
-    camera.processKeyboard(window, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-
-    // clear BOTH buffers at the TOP
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // rotate FIRST then upload
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::rotate(model,
-                        static_cast<float>(glfwGetTime()),
-                        glm::vec3(0.5f, 1.0f, 0.0f));
-
-    glm::mat4 view       = camera.getViewMatrix();
-    glm::mat4 projection = camera.getProjectionMatrix(1280.0f / 720.0f);
-
-    shader.bind();
-    // Direction Light(Theeee SUN)
-    shader.setVec3("u_dirLight.direction", glm::vec3(-0.2f , -1.0f, 0.3f));
-    shader.setVec3("u_dirLight.ambient", glm::vec3(0.05f, 0.05f , 0.05f));
-    shader.setVec3("u_dirLight.diffuse", glm::vec3(0.4f, 0.4f , 0.4f));
-    shader.setVec3("u_dirLight.specular", glm::vec3(0.5f, 0.5f , 0.5f));
-
-    // Point Light
-    shader.setVec3("u_pointLight.position" , glm::vec3(1.2f, 1.0f , 2.0f));
-    shader.setVec3("u_pointLight.ambient" , glm::vec3(0.05f, 0.05f , 0.05f));
-    shader.setVec3("u_pointLight.diffuse" , glm::vec3(0.8f, 0.8f , 0.8f));
-    shader.setVec3("u_pointLight.specular" , glm::vec3(1.0f, 1.0f , 1.0f));
-    shader.setFloat("u_pointLight.constant", 1.0f);
-    shader.setFloat("u_pointLight.linear", 0.09f);
-    shader.setFloat("u_pointLight.quadratic", 0.032f);
-
-    // Spotlight(follows the camera)
-    shader.setVec3("u_spotLight.position" , camera.getPosition());
-    shader.setVec3("u_spotLight.direction", camera.getFront());
-    shader.setVec3("u_spotLight.ambient",glm::vec3(0.0f,0.0f,0.0f));
-    shader.setVec3("u_spotLight.diffuse",glm::vec3(1.0f,1.0f,1.0f));
-    shader.setVec3("u_spotLight.specular",glm::vec3(1.0f,1.0f,1.0f));
-    shader.setFloat("u_spotLight.constant",1.0f);
-    shader.setFloat("u_spotLight.linear",0.09f);
-    shader.setFloat("u_spotLight.quadratic",0.032f);
-    shader.setFloat("u_spotLight.cutOff",glm::cos(glm::radians(12.5f)));
-    shader.setFloat("u_spotLight.outerCutOff",glm::cos(glm::radians(15.0f)));
-
-
-
-    shader.setMat4("u_model",      model);
-    shader.setMat4("u_view",       view);
-    shader.setMat4("u_projection", projection);
-    shader.setVec3("u_objectColor", glm::vec3(1.0f, 0.5f, 0.2f));
-    shader.setVec3("u_viewPos", camera.getPosition());
-
-    vao.bind();
-    glDrawElements(GL_TRIANGLES, ibo.getCount(), GL_UNSIGNED_INT, 0);
-
-
-     // ... rendering code ...
-    glfwSwapBuffers(window);
-    glfwPollEvents();
+        // ------------------- SHADER ------------------ 
+        Caliber::Shader shader("shaders/basic.vert" , "shaders/basic.frag");
         
-}
+        // State Variables
+        float lastFrame = 0.0f;
+        bool s_tabWasPressed = false;
+
+        //-----------------------------------------------
+        // ----------------Main Loop---------------------
+        //-----------------------------------------------
+        while (!glfwWindowShouldClose(window)) {
+            float currentFrame = static_cast<float>(glfwGetTime());
+            float deltaTime    = currentFrame - lastFrame;
+            lastFrame          = currentFrame;
+
+            // -------------- KEYBOARD INPUT -----------------
+            bool tabPressed = glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS;
+            if (tabPressed && !s_tabWasPressed) {
+                s_cursorCaptured = !s_cursorCaptured;
+                glfwSetInputMode(window, GLFW_CURSOR, s_cursorCaptured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+                
+                // Reset first mouse to prevent sudden camera jumps when switching back
+                if(s_cursorCaptured) s_firstMouse = true; 
+            }
+            s_tabWasPressed = tabPressed;
+
+            // disable camera movement when using ImGui
+            if (s_cursorCaptured) {
+                camera.processKeyboard(window, deltaTime);
+            }
+            if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+                glfwSetWindowShouldClose(window, true);
+            }
+
+            // clear BOTH buffers at the TOP
+            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            // -------------- UI SECTION -----------------
+            Caliber::UI::beginFrame();
+            
+            ImGui::Begin("Caliber Debug");
+                ImGui::Text("FPS : %.1f", ImGui::GetIO().Framerate);
+                ImGui::Separator();
+
+                // Light Controls 
+                ImGui::Text("Point Light");
+                static glm::vec3 pointLightPos(1.2f, 1.0f , 2.0f);
+                ImGui::SliderFloat3("Position##Ppoint", &pointLightPos.x, -5.0f, 5.0f);
+
+                ImGui::Separator();
+                ImGui::Text("Object");
+                static glm::vec3 objectColor(1.0f, 0.5f, 0.2f);
+                ImGui::ColorEdit3("Color", &objectColor.x);
+            ImGui::End();
+
+            // -------------- RENDERING -----------------
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::rotate(model,
+                                static_cast<float>(glfwGetTime()),
+                                glm::vec3(0.5f, 1.0f, 0.0f));
+
+            glm::mat4 view       = camera.getViewMatrix();
+            glm::mat4 projection = camera.getProjectionMatrix(1280.0f / 720.0f);
+
+            shader.bind();
+            
+            // Apply Uniforms from ImGui
+            shader.setVec3("u_pointLight.position", pointLightPos);
+            shader.setVec3("u_objectColor",         objectColor);
+
+            // Directional Light (The Sun)
+            shader.setVec3("u_dirLight.direction", glm::vec3(-0.2f , -1.0f, 0.3f));
+            shader.setVec3("u_dirLight.ambient", glm::vec3(0.05f, 0.05f , 0.05f));
+            shader.setVec3("u_dirLight.diffuse", glm::vec3(0.4f, 0.4f , 0.4f));
+            shader.setVec3("u_dirLight.specular", glm::vec3(0.5f, 0.5f , 0.5f));
+
+            // Point Light Attributes
+            // [FIX 3]: Removed the hardcoded position overwrite that was right here
+            shader.setVec3("u_pointLight.ambient" , glm::vec3(0.05f, 0.05f , 0.05f));
+            shader.setVec3("u_pointLight.diffuse" , glm::vec3(0.8f, 0.8f , 0.8f));
+            shader.setVec3("u_pointLight.specular" , glm::vec3(1.0f, 1.0f , 1.0f));
+            shader.setFloat("u_pointLight.constant", 1.0f);
+            shader.setFloat("u_pointLight.linear", 0.09f);
+            shader.setFloat("u_pointLight.quadratic", 0.032f);
+
+            // Spotlight (follows the camera)
+            shader.setVec3("u_spotLight.position" , camera.getPosition());
+            shader.setVec3("u_spotLight.direction", camera.getFront());
+            shader.setVec3("u_spotLight.ambient", glm::vec3(0.0f,0.0f,0.0f));
+            shader.setVec3("u_spotLight.diffuse", glm::vec3(1.0f,1.0f,1.0f));
+            shader.setVec3("u_spotLight.specular", glm::vec3(1.0f,1.0f,1.0f));
+            shader.setFloat("u_spotLight.constant", 1.0f);
+            shader.setFloat("u_spotLight.linear", 0.09f);
+            shader.setFloat("u_spotLight.quadratic", 0.032f);
+            shader.setFloat("u_spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+            shader.setFloat("u_spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
+
+            // Matrices & View
+            shader.setMat4("u_model",      model);
+            shader.setMat4("u_view",       view);
+            shader.setMat4("u_projection", projection);
+            shader.setVec3("u_viewPos", camera.getPosition());
+
+            // Draw Geometry
+            vao.bind();
+            glDrawElements(GL_TRIANGLES, ibo.getCount(), GL_UNSIGNED_INT, 0);
+
+            // Draw ImGui over the scene
+            Caliber::UI::endFrame();
+
+            glfwSwapBuffers(window);
+            glfwPollEvents();
+        }
+        
+    } 
 
     // Cleanup
-    glfwTerminate();
+    Caliber::UI::shutdown();
+    glfwTerminate(); // Safe to terminate context now
 
     return 0;
-
 }

@@ -18,4 +18,4 @@ namespace Caliber{
             static void endFrame();
     };
 
-} // namespace caliber
+} // namespace caliber  
