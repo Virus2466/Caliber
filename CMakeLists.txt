@@ -24,6 +24,7 @@ target_include_directories(Caliber PRIVATE
     external/glad/include
     external/glfw/include
     external/glm
+    external/stb 
 )
 
 # ── GLFW (built from source via submodule) ────────────────────
@@ -76,3 +77,8 @@ add_custom_command(TARGET Caliber POST_BUILD
     $<TARGET_FILE_DIR:Caliber>/shaders
 )
 
+add_custom_command(TARGET Caliber POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_SOURCE_DIR}/assets
+    $<TARGET_FILE_DIR:Caliber>/assets
+)

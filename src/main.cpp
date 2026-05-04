@@ -226,7 +226,6 @@ int main(){
             shader.setVec3("u_dirLight.specular", glm::vec3(0.5f, 0.5f , 0.5f));
 
             // Point Light Attributes
-            // [FIX 3]: Removed the hardcoded position overwrite that was right here
             shader.setVec3("u_pointLight.ambient" , glm::vec3(0.05f, 0.05f , 0.05f));
             shader.setVec3("u_pointLight.diffuse" , glm::vec3(0.8f, 0.8f , 0.8f));
             shader.setVec3("u_pointLight.specular" , glm::vec3(1.0f, 1.0f , 1.0f));
