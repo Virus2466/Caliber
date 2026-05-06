@@ -47,6 +47,7 @@ public:
   void setVec3(std::string_view name, const glm::vec3 &value) const;
   void setVec4(std::string_view name, const glm::vec4 &value) const;
   void setMat4(std::string_view name, const glm::mat4 &value) const;
+  void setBool(std::string_view name, bool value) const;
 
   [[nodiscard]] uint32_t getID() const { return m_id; }
 

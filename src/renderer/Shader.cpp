@@ -75,6 +75,10 @@ namespace Caliber{
         glUniformMatrix4fv(getUniformLocation(name) , 1 , GL_FALSE , glm::value_ptr(value));
     }
 
+    void Shader::setBool(std::string_view name, bool value) const {
+        glUniform1i(getUniformLocation(name), static_cast<int>(value));
+    }
+
     // --------------- PRIVATE HELPERS ---------------------
     std::string Shader::readFile(const std::filesystem::path& path){
         std::ifstream file(path);

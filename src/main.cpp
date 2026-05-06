@@ -13,44 +13,41 @@
 #include "scene/Camera.h"
 #include "core/UI.h"
 #include <imgui.h>
+#include "renderer/Texture.h"
 
 // Vertices (x , y ,z)
 static float vertices[] = {
+    // pos (3)          normal (3)         UV (2)
     // back face
-    -0.5f, -0.5f, -0.5f,   0.0f,  0.0f, -1.0f,
-     0.5f, -0.5f, -0.5f,   0.0f,  0.0f, -1.0f,
-     0.5f,  0.5f, -0.5f,   0.0f,  0.0f, -1.0f,
-    -0.5f,  0.5f, -0.5f,   0.0f,  0.0f, -1.0f,
-
+    -0.5f,-0.5f,-0.5f,  0.0f, 0.0f,-1.0f,  0.0f, 0.0f,
+     0.5f,-0.5f,-0.5f,  0.0f, 0.0f,-1.0f,  1.0f, 0.0f,
+     0.5f, 0.5f,-0.5f,  0.0f, 0.0f,-1.0f,  1.0f, 1.0f,
+    -0.5f, 0.5f,-0.5f,  0.0f, 0.0f,-1.0f,  0.0f, 1.0f,
     // front face
-    -0.5f, -0.5f,  0.5f,   0.0f,  0.0f,  1.0f,
-     0.5f, -0.5f,  0.5f,   0.0f,  0.0f,  1.0f,
-     0.5f,  0.5f,  0.5f,   0.0f,  0.0f,  1.0f,
-    -0.5f,  0.5f,  0.5f,   0.0f,  0.0f,  1.0f,
-
+    -0.5f,-0.5f, 0.5f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f,
+     0.5f,-0.5f, 0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f,
+     0.5f, 0.5f, 0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f,
+    -0.5f, 0.5f, 0.5f,  0.0f, 0.0f, 1.0f,  0.0f, 1.0f,
     // left face
-    -0.5f, -0.5f, -0.5f,  -1.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f, -0.5f,  -1.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f,  0.5f,  -1.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f,  0.5f,  -1.0f,  0.0f,  0.0f,
-
+    -0.5f,-0.5f,-0.5f, -1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+    -0.5f, 0.5f,-0.5f, -1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+    -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+    -0.5f,-0.5f, 0.5f, -1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
     // right face
-     0.5f, -0.5f, -0.5f,   1.0f,  0.0f,  0.0f,
-     0.5f,  0.5f, -0.5f,   1.0f,  0.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,   1.0f,  0.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,   1.0f,  0.0f,  0.0f,
-
+     0.5f,-0.5f,-0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+     0.5f, 0.5f,-0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+     0.5f, 0.5f, 0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+     0.5f,-0.5f, 0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
     // top face
-    -0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,
-     0.5f,  0.5f, -0.5f,   0.0f,  1.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,
-    -0.5f,  0.5f,  0.5f,   0.0f,  1.0f,  0.0f,
-
+    -0.5f, 0.5f,-0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,
+     0.5f, 0.5f,-0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
+     0.5f, 0.5f, 0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f,
+    -0.5f, 0.5f, 0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f,
     // bottom face
-    -0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,
-     0.5f, -0.5f, -0.5f,   0.0f, -1.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,
-    -0.5f, -0.5f,  0.5f,   0.0f, -1.0f,  0.0f,
+    -0.5f,-0.5f,-0.5f,  0.0f,-1.0f, 0.0f,  0.0f, 0.0f,
+     0.5f,-0.5f,-0.5f,  0.0f,-1.0f, 0.0f,  1.0f, 0.0f,
+     0.5f,-0.5f, 0.5f,  0.0f,-1.0f, 0.0f,  1.0f, 1.0f,
+    -0.5f,-0.5f, 0.5f,  0.0f,-1.0f, 0.0f,  0.0f, 1.0f,
 };
 
 static uint32_t indices[] = {
@@ -145,11 +142,18 @@ int main(){
         Caliber::IndexBuffer ibo(indices , 36);
         ibo.bind();
 
-        vao.addAttribute(0, 3, 6 * sizeof(float), 0);
-        vao.addAttribute(1, 3, 6 * sizeof(float), 3 * sizeof(float));
+        // Position , UV , Normal
+        vao.addAttribute(0, 3, 8 * sizeof(float), 0);
+        vao.addAttribute(1, 3, 8 * sizeof(float), 3 * sizeof(float));
+        vao.addAttribute(2, 2, 8 * sizeof(float), 6 * sizeof(float));   
 
         // ------------------- SHADER ------------------ 
         Caliber::Shader shader("shaders/basic.vert" , "shaders/basic.frag");
+
+        // Texture mapping
+        Caliber::Texture diffuseMap("assets/textures/brickwall.jpg");
+        Caliber::Texture normalMap("assets/textures/brickwall_normal.jpg");         
+
         
         // State Variables
         float lastFrame = 0.0f;
@@ -251,6 +255,12 @@ int main(){
             shader.setMat4("u_projection", projection);
             shader.setVec3("u_viewPos", camera.getPosition());
 
+            shader.setInt ("u_diffuseMap",   0);
+            shader.setInt ("u_normalMap",    1);
+            shader.setBool("u_useNormalMap", true);
+
+            diffuseMap.bind(0);
+            normalMap.bind(1);
             // Draw Geometry
             vao.bind();
             glDrawElements(GL_TRIANGLES, ibo.getCount(), GL_UNSIGNED_INT, 0);
@@ -270,3 +280,4 @@ int main(){
 
     return 0;
 }
+

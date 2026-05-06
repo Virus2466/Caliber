@@ -2,6 +2,7 @@
 
 in vec3 v_normal;
 in vec3 v_fragPos;
+in vec2 v_texCoord;
 
 out vec4 FragColor;
 
@@ -46,6 +47,10 @@ uniform DirectionalLight u_dirLight;
 uniform PointLight u_pointLight;
 uniform SpotLight u_spotLight;
 
+uniform sampler2D u_diffuseMap;
+uniform sampler2D u_normalMap;
+uniform bool      u_useNormalMap;
+
 
 vec3 calcDirectional(DirectionalLight light , vec3 normal , vec3 viewDir);
 vec3 calcPoint(PointLight light , vec3 normal , vec3 viewDir , vec3 fragPos);
@@ -53,19 +58,34 @@ vec3 calcSpot(SpotLight light , vec3 normal , vec3 viewDir , vec3 fragPos);
 
 
 
-void main(){
+void main() {
+    vec3 normal;
+    if (u_useNormalMap) {
+        // sample normal map and convert from [0,1] to [-1,1]
+        normal = texture(u_normalMap, v_texCoord).rgb;
+        normal = normalize(normal * 2.0 - 1.0);
+    } else {
+        normal = normalize(v_normal);
+    }
+    vec3 objectColor = texture(u_diffuseMap, v_texCoord).rgb;
 
-    vec3 normal = normalize(v_normal);
     vec3 viewDir = normalize(u_viewPos - v_fragPos);
-    
+
     vec3 result = vec3(0.0);
-    result += calcDirectional(u_dirLight , normal , viewDir);
-    result += calcPoint(u_pointLight , normal , viewDir , v_fragPos);
-    result += calcSpot(u_spotLight , normal , viewDir , v_fragPos);
+    result += calcDirectional(u_dirLight,   normal, viewDir);
+    result += calcPoint      (u_pointLight, normal, viewDir, v_fragPos);
+    result += calcSpot       (u_spotLight,  normal, viewDir, v_fragPos);
 
-    FragColor = vec4(result * u_objectColor , 1.0);
-
+    FragColor = vec4(result * objectColor, 1.0);
 }
+
+
+
+
+
+
+
+
 
 
 vec3 calcDirectional(DirectionalLight light , vec3 normal , vec3 viewDir){
