@@ -18,6 +18,7 @@
 // Vertices (x , y ,z)
 static float vertices[] = {
     // pos (3)          normal (3)         UV (2)
+    
     // back face
     -0.5f,-0.5f,-0.5f,  0.0f, 0.0f,-1.0f,  0.0f, 0.0f,
      0.5f,-0.5f,-0.5f,  0.0f, 0.0f,-1.0f,  1.0f, 0.0f,
@@ -104,7 +105,7 @@ int main(){
     glfwWindowHint(GLFW_OPENGL_PROFILE , GLFW_OPENGL_CORE_PROFILE);
 
     // Create Window.
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Caliber - test", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "Caliber(Alpha 1.0)", nullptr, nullptr);
     if(!window){
         std::cerr << "Failed to create Window\n";
         glfwTerminate();
