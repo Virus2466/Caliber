@@ -83,3 +83,20 @@ add_custom_command(TARGET Caliber POST_BUILD
     ${CMAKE_SOURCE_DIR}/assets
     $<TARGET_FILE_DIR:Caliber>/assets
 )
+
+
+# collect shader files
+file(GLOB_RECURSE SHADER_FILES
+    "${CMAKE_SOURCE_DIR}/shaders/*.vert"
+    "${CMAKE_SOURCE_DIR}/shaders/*.frag"
+)
+
+# custom target that always copies shaders
+add_custom_target(CopyShaders ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_SOURCE_DIR}/shaders
+    $<TARGET_FILE_DIR:Caliber>/shaders
+    COMMENT "Copying shaders..."
+)
+
+add_dependencies(Caliber CopyShaders)

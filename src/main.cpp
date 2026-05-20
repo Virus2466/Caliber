@@ -6,8 +6,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "glm/fwd.hpp"
-#include "glm/trigonometric.hpp"
 
+#include "imgui_internal.h"
 #include "renderer/Shader.h"
 #include "renderer/Buffer.h"
 #include "scene/Camera.h"
@@ -91,6 +91,11 @@ void scrollCallBack(GLFWwindow*, double, double yOffset){
     camera.processScroll(static_cast<float>(yOffset));
 }
 
+
+
+
+
+
 // ------------------- MAIN ------------------ 
 int main(){
     // Initialize GLFW
@@ -131,8 +136,7 @@ int main(){
     std::cout << "OpenGL " << glGetString(GL_VERSION) << "\n";
     std::cout << "Caliber Running...\n";
 
-    { // [FIX 2]: Added scope block to ensure all OpenGL objects are destroyed before glfwTerminate()
-
+    { 
         // ------------------- GPU Buffers ------------------ 
         Caliber::VertexArray vao;
         vao.bind();
@@ -149,7 +153,7 @@ int main(){
         vao.addAttribute(2, 2, 8 * sizeof(float), 6 * sizeof(float));   
 
         // ------------------- SHADER ------------------ 
-        Caliber::Shader shader("shaders/basic.vert" , "shaders/basic.frag");
+        Caliber::Shader shader("shaders/pbr.vert" , "shaders/pbr.frag");
 
         // Texture mapping
         Caliber::Texture diffuseMap("assets/textures/brickwall.jpg");
@@ -159,6 +163,25 @@ int main(){
         // State Variables
         float lastFrame = 0.0f;
         bool s_tabWasPressed = false;
+        static glm::vec3 albedo(0.8f,0.8f,0.8f);
+        static float metallic = 0.9f;
+        static float roughness = 0.2f;
+        static float ao = 1.0f;
+
+        // Light Positions and colors
+        glm::vec3 lightPositions[] ={
+            glm::vec3(2.0f,2.0f,2.0f),
+            glm::vec3(-2.0f,2.0f,2.0f),
+        };
+
+        glm::vec3 lightColors[] = {
+            glm::vec3(150.0f,150.0f,150.0f),
+            glm::vec3(150.0f,150.0f,150.0f),
+        };
+
+
+
+
 
         //-----------------------------------------------
         // ----------------Main Loop---------------------
@@ -198,15 +221,24 @@ int main(){
                 ImGui::Text("FPS : %.1f", ImGui::GetIO().Framerate);
                 ImGui::Separator();
 
-                // Light Controls 
-                ImGui::Text("Point Light");
-                static glm::vec3 pointLightPos(1.2f, 1.0f , 2.0f);
-                ImGui::SliderFloat3("Position##Ppoint", &pointLightPos.x, -5.0f, 5.0f);
+                ImGui::Text("PBR MATERIAL");
+                ImGui::ColorEdit3("Albedo", &albedo.x);
+                ImGui::SliderFloat("Metallic",  &metallic,0.0f, 1.0f);
+                ImGui::SliderFloat("Roughness",      &roughness,  0.0f, 1.0f);
+                ImGui::SliderFloat("AO",             &ao,         0.0f, 1.0f);
+
 
                 ImGui::Separator();
-                ImGui::Text("Object");
-                static glm::vec3 objectColor(1.0f, 0.5f, 0.2f);
-                ImGui::ColorEdit3("Color", &objectColor.x);
+                ImGui::Text("Light 0");
+                ImGui::SliderFloat3("Position##L0" , &lightPositions[0].x , -5.0f , 5.0f);
+                ImGui::ColorEdit3("Color##L0" , &lightColors[0].x);
+
+                ImGui::Text("Light 1");
+                ImGui::SliderFloat3("Position##L1" , &lightPositions[1].x , -5.0f , 5.0f);
+                ImGui::ColorEdit3("ColorEdit##L1" , &lightColors[1].x);
+
+
+
             ImGui::End();
 
             // -------------- RENDERING -----------------
@@ -219,49 +251,28 @@ int main(){
             glm::mat4 projection = camera.getProjectionMatrix(1280.0f / 720.0f);
 
             shader.bind();
-            
-            // Apply Uniforms from ImGui
-            shader.setVec3("u_pointLight.position", pointLightPos);
-            shader.setVec3("u_objectColor",         objectColor);
-
-            // Directional Light (The Sun)
-            shader.setVec3("u_dirLight.direction", glm::vec3(-0.2f , -1.0f, 0.3f));
-            shader.setVec3("u_dirLight.ambient", glm::vec3(0.05f, 0.05f , 0.05f));
-            shader.setVec3("u_dirLight.diffuse", glm::vec3(0.4f, 0.4f , 0.4f));
-            shader.setVec3("u_dirLight.specular", glm::vec3(0.5f, 0.5f , 0.5f));
-
-            // Point Light Attributes
-            shader.setVec3("u_pointLight.ambient" , glm::vec3(0.05f, 0.05f , 0.05f));
-            shader.setVec3("u_pointLight.diffuse" , glm::vec3(0.8f, 0.8f , 0.8f));
-            shader.setVec3("u_pointLight.specular" , glm::vec3(1.0f, 1.0f , 1.0f));
-            shader.setFloat("u_pointLight.constant", 1.0f);
-            shader.setFloat("u_pointLight.linear", 0.09f);
-            shader.setFloat("u_pointLight.quadratic", 0.032f);
-
-            // Spotlight (follows the camera)
-            shader.setVec3("u_spotLight.position" , camera.getPosition());
-            shader.setVec3("u_spotLight.direction", camera.getFront());
-            shader.setVec3("u_spotLight.ambient", glm::vec3(0.0f,0.0f,0.0f));
-            shader.setVec3("u_spotLight.diffuse", glm::vec3(1.0f,1.0f,1.0f));
-            shader.setVec3("u_spotLight.specular", glm::vec3(1.0f,1.0f,1.0f));
-            shader.setFloat("u_spotLight.constant", 1.0f);
-            shader.setFloat("u_spotLight.linear", 0.09f);
-            shader.setFloat("u_spotLight.quadratic", 0.032f);
-            shader.setFloat("u_spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-            shader.setFloat("u_spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
-
             // Matrices & View
+            // PBR
+            shader.setVec3("u_albedo" , albedo);
+            shader.setFloat("u_metallic" , metallic);
+            shader.setFloat("u_roughness",roughness);
+            shader.setFloat("u_ao" ,ao);
+            shader.setInt("u_lightCount",2);
             shader.setMat4("u_model",      model);
             shader.setMat4("u_view",       view);
             shader.setMat4("u_projection", projection);
             shader.setVec3("u_viewPos", camera.getPosition());
 
-            shader.setInt ("u_diffuseMap",   0);
-            shader.setInt ("u_normalMap",    1);
-            shader.setBool("u_useNormalMap", true);
+                    
+            // upload light arrays
+            for (int i = 0; i < 2; i++) {
+                std::string pos   = "u_lightPositions[" + std::to_string(i) + "]";
+                std::string color = "u_lightColors["    + std::to_string(i) + "]";
+                shader.setVec3(pos,   lightPositions[i]);
+                shader.setVec3(color, lightColors[i]);
+            }
 
-            diffuseMap.bind(0);
-            normalMap.bind(1);
+
             // Draw Geometry
             vao.bind();
             glDrawElements(GL_TRIANGLES, ibo.getCount(), GL_UNSIGNED_INT, 0);
@@ -280,5 +291,7 @@ int main(){
     glfwTerminate(); // Safe to terminate context now
 
     return 0;
+
+
 }
 

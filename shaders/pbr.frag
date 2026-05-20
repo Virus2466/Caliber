@@ -2,10 +2,10 @@
 
 in vec3 v_fragPos;
 in vec3 v_normal;
-in vec3 texCoord;
+in vec2 v_texCoord;
 
 
-out vec4 v_fragColor;
+out vec4 FragColor;
 
 // Material
 uniform vec3 u_albedo;
@@ -31,7 +31,7 @@ float distributionGGX(vec3 N , vec3 H ,  float roughness){
     float NdotH = max(dot(N,H),0.0);
     float NdotH2 = NdotH * NdotH;
 
-    float denom = (NdotH * (a2 - 1.0) + 1.0);
+    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
     denom = PI * denom * denom;
 
     return a2 / denom;
@@ -42,7 +42,7 @@ float distributionGGX(vec3 N , vec3 H ,  float roughness){
 float geometrySchilkGGX(float NdotV , float roughness){
     float r = roughness + 1.0;
     float k = (r*r) / 8.0;
-    return NdotV / (NdotV * (1.0 - k) * k);
+    return NdotV / (NdotV * (1.0 - k) + k);
 
 }
 
@@ -61,4 +61,60 @@ vec3 fresnelSchilk(float cosTheta , vec3 F0){
 
 
 // Main
-void main(){}
+void main(){
+    vec3 N = normalize(v_normal);
+    vec3 V = normalize(u_viewPos - v_fragPos);
+
+
+    // F0 -> base reflectivity
+    // non metals uses 0.04 metals uses their color
+    vec3 F0 = vec3(0.04);
+    F0 = mix(F0 , u_albedo , u_metallic);
+
+    // reflectance equation
+    vec3 Lo = vec3(0.0);
+
+    for(int i = 0 ; i < u_lightCount; i++){
+        vec3 L = normalize(u_lightPositions[i] - v_fragPos);
+        vec3 H = normalize(V+L);
+
+        // attenuation
+        float distance = length(u_lightPositions[i] - v_fragPos);
+        float attenuation = 1.0 / (distance * distance);
+        vec3 radiance = u_lightColors[i] * attenuation;
+
+        // Cook Torrence BRDF
+        float D = distributionGGX(N,H,u_roughness);
+        float G = geometrySmith(N,V,L,u_roughness);
+        vec3 F = fresnelSchilk(max(dot(H,V),0.0),F0);
+
+        // specular
+        vec3 numerator = D * G * F;
+        float denominator = 4.0 * max(dot(N,V),0.0) * max(dot(N,L),0.0) + 0.0001;
+        vec3 specular = numerator / denominator;
+
+
+        // kd -> diffuse contribution
+        vec3 kS = F;
+        vec3 kD = vec3(1.0) - kS;
+        kD *= (1.0 - u_metallic);
+
+        float NdotL = max(dot(N,L),0.0);
+        Lo += (kD * u_albedo / PI + specular) * radiance * NdotL;
+    }
+
+    // ambient
+    vec3 ambient = vec3(0.03) * u_albedo * u_ao;
+    vec3 color = ambient + Lo;
+
+    // HDR tonemapping - compress bright values
+    color = color / (color + vec3(1.0));
+
+    // gamma correction
+    color = pow(color , vec3(1.0/2.2));
+
+    FragColor = vec4(color , 1.0);
+
+
+
+}
