@@ -25,7 +25,8 @@ target_include_directories(Caliber PRIVATE
     external/glad/include
     external/glfw/include
     external/glm
-    external/stb 
+    external/stb
+    external/assimp/include
 )
 
 # ── GLFW (built from source via submodule) ────────────────────
@@ -42,6 +43,7 @@ target_link_libraries(Caliber PRIVATE
     OpenGL::GL
     glfw
     ImGui
+    assimp 
 )
 
 # ── ImGui ─────────────────────────────────────────────────────
@@ -61,6 +63,22 @@ target_include_directories(ImGui PUBLIC
     ${IMGUI_DIR}/backends
     external/glfw/include
 )
+
+
+
+# ── Assimp ────────────────────────────────────────────────────
+set(ASSIMP_BUILD_TESTS        OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_EXAMPLES     OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INSTALL            OFF CACHE BOOL "" FORCE)
+set(ASSIMP_NO_EXPORT          ON  CACHE BOOL "" FORCE)
+
+# only build GLTF and OBJ importers — speeds up compile massively
+set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_GLTF_IMPORTER           ON  CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_OBJ_IMPORTER            ON  CACHE BOOL "" FORCE)
+
+add_subdirectory(external/assimp)
 
 
 
