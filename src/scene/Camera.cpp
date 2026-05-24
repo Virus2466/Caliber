@@ -66,7 +66,7 @@ namespace Caliber{
     }
 
     glm::mat4 Camera::getProjectionMatrix(float aspectRatio) const {
-        return glm::perspective(glm::radians(m_fov), aspectRatio, 0.1f, 100.0f);
+        return glm::perspective(glm::radians(m_fov), aspectRatio, 0.1f, 10000.0f);
     }
 
 

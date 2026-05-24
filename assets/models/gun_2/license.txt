@@ -1,0 +1,11 @@
+Model Information:
+* title:	Colt 1911
+* source:	https://sketchfab.com/3d-models/colt-1911-e9c4fa703b6f4b388d84068c417da642
+* author:	Hung Do (https://sketchfab.com/hungdo)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Colt 1911" (https://sketchfab.com/3d-models/colt-1911-e9c4fa703b6f4b388d84068c417da642) by Hung Do (https://sketchfab.com/hungdo) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

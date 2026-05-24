@@ -1,12 +1,12 @@
-#include <cstdint>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <filesystem>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "glm/fwd.hpp"
-
 
 #include "renderer/Shader.h"
 #include "renderer/Buffer.h"
@@ -14,51 +14,10 @@
 #include "core/UI.h"
 #include <imgui.h>
 #include "renderer/Texture.h"
+#include "renderer/Model.h"
 
-// Vertices (x , y ,z)
-static float vertices[] = {
-    // pos (3)          normal (3)         UV (2)
-    
-    // back face
-    -0.5f,-0.5f,-0.5f,  0.0f, 0.0f,-1.0f,  0.0f, 0.0f,
-     0.5f,-0.5f,-0.5f,  0.0f, 0.0f,-1.0f,  1.0f, 0.0f,
-     0.5f, 0.5f,-0.5f,  0.0f, 0.0f,-1.0f,  1.0f, 1.0f,
-    -0.5f, 0.5f,-0.5f,  0.0f, 0.0f,-1.0f,  0.0f, 1.0f,
-    // front face
-    -0.5f,-0.5f, 0.5f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f,
-     0.5f,-0.5f, 0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f,
-     0.5f, 0.5f, 0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f,
-    -0.5f, 0.5f, 0.5f,  0.0f, 0.0f, 1.0f,  0.0f, 1.0f,
-    // left face
-    -0.5f,-0.5f,-0.5f, -1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
-    -0.5f, 0.5f,-0.5f, -1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
-    -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
-    -0.5f,-0.5f, 0.5f, -1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
-    // right face
-     0.5f,-0.5f,-0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
-     0.5f, 0.5f,-0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
-     0.5f, 0.5f, 0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
-     0.5f,-0.5f, 0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
-    // top face
-    -0.5f, 0.5f,-0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,
-     0.5f, 0.5f,-0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
-     0.5f, 0.5f, 0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f,
-    -0.5f, 0.5f, 0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f,
-    // bottom face
-    -0.5f,-0.5f,-0.5f,  0.0f,-1.0f, 0.0f,  0.0f, 0.0f,
-     0.5f,-0.5f,-0.5f,  0.0f,-1.0f, 0.0f,  1.0f, 0.0f,
-     0.5f,-0.5f, 0.5f,  0.0f,-1.0f, 0.0f,  1.0f, 1.0f,
-    -0.5f,-0.5f, 0.5f,  0.0f,-1.0f, 0.0f,  0.0f, 1.0f,
-};
 
-static uint32_t indices[] = {
-    0,  1,  2,      2,  3,  0,   // back
-    4,  5,  6,      6,  7,  4,   // front
-    8,  9, 10,   10, 11,  8,   // left
-    12, 13, 14,  14, 15, 12,   // right
-    16, 17, 18,  18, 19, 16,   // top
-    20, 21, 22,  22, 23, 20,   // bottom
-};
+
 
 // ------------------- MOUSE STATE ------------------ 
 static float s_lastX = 640.0f;
@@ -66,7 +25,7 @@ static float s_lastY = 360.0f;
 static bool s_firstMouse = true;
 static bool s_cursorCaptured = true; 
 
-Caliber::Camera camera(glm::vec3(0.0f , 0.0f , 3.0f));
+Caliber::Camera camera(glm::vec3(0.0f , 0.0f , 10.0f));
 
 // ------------------- CALLBACKS ------------------ 
 void mouseCallBack(GLFWwindow*, double xpos , double ypos){
@@ -125,6 +84,7 @@ int main(){
         return -1;
     }
     glEnable(GL_DEPTH_TEST);
+    // glPolygonMode(GL_FRONT_AND_BACK , GL_LINE);
     glDisable(GL_CULL_FACE);
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -135,30 +95,31 @@ int main(){
 
     std::cout << "OpenGL " << glGetString(GL_VERSION) << "\n";
     std::cout << "Caliber Running...\n";
+    std::cout << "Working directory: " << std::filesystem::current_path() << "\n";
 
     { 
-        // ------------------- GPU Buffers ------------------ 
-        Caliber::VertexArray vao;
-        vao.bind();
+        
 
-        Caliber::VertexBuffer vbo(vertices , sizeof(vertices));
-        vbo.bind();
-
-        Caliber::IndexBuffer ibo(indices , 36);
-        ibo.bind();
-
-        // Position , UV , Normal
-        vao.addAttribute(0, 3, 8 * sizeof(float), 0);
-        vao.addAttribute(1, 3, 8 * sizeof(float), 3 * sizeof(float));
-        vao.addAttribute(2, 2, 8 * sizeof(float), 6 * sizeof(float));   
+        
 
         // ------------------- SHADER ------------------ 
         Caliber::Shader shader("shaders/pbr.vert" , "shaders/pbr.frag");
 
-        // Texture mapping
-        Caliber::Texture diffuseMap("assets/textures/brickwall.jpg");
-        Caliber::Texture normalMap("assets/textures/brickwall_normal.jpg");         
 
+        // Load Model
+        auto gunModel = Caliber::Model::load(
+            std::filesystem::current_path() / "assets" / "models" / "gun" / "scene.gltf"
+        );
+        if(!gunModel){
+            std::cerr << "Failed to Load gun model\n";
+            return -1;
+        }
+
+        std::cout << "[Debug] Camera pos: " 
+          << camera.getPosition().x << ", "
+          << camera.getPosition().y << ", "
+          << camera.getPosition().z << "\n";
+      
         
         // State Variables
         float lastFrame = 0.0f;
@@ -180,7 +141,7 @@ int main(){
         };
 
 
-
+        
 
 
         //-----------------------------------------------
@@ -243,10 +204,11 @@ int main(){
 
             // -------------- RENDERING -----------------
             glm::mat4 model = glm::mat4(1.0f);
-            model = glm::rotate(model,
-                                static_cast<float>(glfwGetTime()),
-                                glm::vec3(0.5f, 1.0f, 0.0f));
+            // model = glm::rotate(model,
+            //                     static_cast<float>(glfwGetTime()),
+            //                     glm::vec3(0.5f, 1.0f, 0.0f));
 
+            // model = glm::scale(model, glm::vec3(1.0f));  
             glm::mat4 view       = camera.getViewMatrix();
             glm::mat4 projection = camera.getProjectionMatrix(1280.0f / 720.0f);
 
@@ -273,9 +235,12 @@ int main(){
             }
 
 
+            
+
             // Draw Geometry
-            vao.bind();
-            glDrawElements(GL_TRIANGLES, ibo.getCount(), GL_UNSIGNED_INT, 0);
+            //glDrawElements(GL_TRIANGLES, ibo.getCount(), GL_UNSIGNED_INT, 0);
+            gunModel->draw(shader);
+
 
             // Draw ImGui over the scene
             Caliber::UI::endFrame();

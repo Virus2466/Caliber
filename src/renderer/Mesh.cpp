@@ -43,7 +43,9 @@ void Mesh::setupMesh(){
     // texCoord - location 2
     m_vao.addAttribute(2, 2, sizeof(Vertex), offsetof(Vertex , texCoord));
 
-    m_vao.bind();
+    m_vao.addAttribute(3, 3, sizeof(Vertex), offsetof(Vertex, tangent));
+
+    m_vao.unbind();
 
 }
 

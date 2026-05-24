@@ -118,3 +118,19 @@ add_custom_target(CopyShaders ALL
 )
 
 add_dependencies(Caliber CopyShaders)
+
+add_custom_command(TARGET Caliber POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_SOURCE_DIR}/assets
+    $<TARGET_FILE_DIR:Caliber>/assets
+    COMMENT "Copying assets..."
+)
+
+add_custom_target(CopyAssets ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_SOURCE_DIR}/assets
+    $<TARGET_FILE_DIR:Caliber>/assets
+    COMMENT "Copying assets..."
+)
+
+add_dependencies(Caliber CopyAssets)
