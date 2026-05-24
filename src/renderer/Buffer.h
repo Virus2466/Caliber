@@ -15,6 +15,7 @@
 namespace Caliber {
     class VertexBuffer {
     public:
+        VertexBuffer() : m_id(0) {}
         VertexBuffer(const float* data , uint32_t size);
         ~VertexBuffer();
   
@@ -35,8 +36,9 @@ namespace Caliber {
     };
 
     // Index Buffer Object -- 
-    class IndexBuffer{
+    class IndexBuffer{ 
         public:
+            IndexBuffer() : m_id(0), m_count(0) {}
             IndexBuffer(const uint32_t* data , uint32_t count);
             
             // Deleting Copy Constructor 

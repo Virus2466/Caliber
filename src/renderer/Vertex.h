@@ -12,7 +12,7 @@ namespace Caliber{
 struct Vertex{
     glm::vec3 position;
     glm::vec3 normal;
-    glm::vec3 textCoord;
+    glm::vec3 texCoord;
 };
 
 

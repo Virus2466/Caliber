@@ -7,7 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "glm/fwd.hpp"
 
-#include "imgui_internal.h"
+
 #include "renderer/Shader.h"
 #include "renderer/Buffer.h"
 #include "scene/Camera.h"
