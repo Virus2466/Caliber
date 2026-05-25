@@ -10,12 +10,10 @@
 #include "glm/fwd.hpp"
 
 #include "renderer/Shader.h"
-#include "renderer/Buffer.h"
 #include "scene/Camera.h"
 #include "core/UI.h"
-#include <imgui.h>
-#include "renderer/Texture.h"
 #include "renderer/Model.h"
+#include <imgui.h>
 
 
 
