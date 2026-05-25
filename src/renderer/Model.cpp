@@ -91,7 +91,7 @@ namespace Caliber{
         }
     }
 
-    Mesh Model::processMesh(aiMesh* mesh , const aiScene* scene){
+    Mesh Model::processMesh(aiMesh* mesh ,[[maybe_unused]] const aiScene* scene){
         std::vector<Vertex> vertices;
         std::vector<uint32_t> indices;
 
