@@ -3,7 +3,7 @@ Real-time gun animation engine built from scratch in C++20 and OpenGL 4.6.
 
 ---
 
-##Gallery
+## Gallery
 
 <img width="1269" height="719" alt="Screenshot 2026-05-26 124846" src="https://github.com/user-attachments/assets/dae7863e-7941-4ea4-b64d-720cf4ceecf6" />
 
