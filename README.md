@@ -11,7 +11,7 @@ Real-time gun animation engine built from scratch in C++20 and OpenGL 4.6.
 
 
 ## Features
-- PBR rendering — Cook-Torrance BRDF
+- PBR rendering - Cook-Torrance BRDF
 - GLTF model loading via Assimp
 - Normal mapping + multiple light types
 - Skeletal animation with blend trees *(in progress)*
