@@ -35,4 +35,3 @@ cmake --build .
 
 ---
 
-*Built by Dev Patel under FrostWorks · MIT License*
