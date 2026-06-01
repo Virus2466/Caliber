@@ -83,8 +83,9 @@ int main(){
         return -1;
     }
     glEnable(GL_DEPTH_TEST);
-    // glPolygonMode(GL_FRONT_AND_BACK , GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK , GL_FILL);
     glDisable(GL_CULL_FACE);
+    
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, mouseCallBack);

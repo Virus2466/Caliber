@@ -20,6 +20,19 @@ uniform int u_lightCount;
 
 uniform vec3 u_viewPos;
 
+// texture maps
+uniform sampler2D u_albedoMap;
+uniform sampler2D u_normalMap;
+uniform sampler2D u_metallicRoughnessMap;
+uniform sampler2D u_aoMap;
+
+// flags
+uniform bool u_hasAlbedoMap;
+uniform bool u_hasNormalMap;
+uniform bool u_hasMetallicRoughnessMap;
+uniform bool u_hasAOMap;
+
+
 // Constants
 const float PI = 3.14159265359;
 
@@ -62,14 +75,23 @@ vec3 fresnelSchilk(float cosTheta , vec3 F0){
 
 // Main
 void main(){
-    vec3 N = normalize(v_normal);
+
+    vec3 albedo = u_hasAlbedoMap ? pow(texture(u_albedoMap , v_texCoord).rgb , vec3(2.2)) : u_albedo;
+    float metallic = u_hasMetallicRoughnessMap ? texture(u_metallicRoughnessMap , v_texCoord).b : u_metallic;
+    float roughness = u_hasMetallicRoughnessMap ? texture(u_metallicRoughnessMap , v_texCoord).g : u_roughness;
+    float ao = u_hasAOMap ? texture(u_aoMap , v_texCoord).r : u_ao;
+
+
+
+
+    vec3 N = u_hasNormalMap ? normalize(texture(u_normalMap , v_texCoord).rgb * 2.0 - 1.0) : normalize(v_normal);
     vec3 V = normalize(u_viewPos - v_fragPos);
 
 
     // F0 -> base reflectivity
     // non metals uses 0.04 metals uses their color
     vec3 F0 = vec3(0.04);
-    F0 = mix(F0 , u_albedo , u_metallic);
+    F0 = mix(F0 , albedo , metallic);
 
     // reflectance equation
     vec3 Lo = vec3(0.0);
@@ -97,14 +119,14 @@ void main(){
         // kd -> diffuse contribution
         vec3 kS = F;
         vec3 kD = vec3(1.0) - kS;
-        kD *= (1.0 - u_metallic);
+        kD *= (1.0 - metallic);
 
         float NdotL = max(dot(N,L),0.0);
-        Lo += (kD * u_albedo / PI + specular) * radiance * NdotL;
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL;
     }
 
     // ambient
-    vec3 ambient = vec3(0.03) * u_albedo * u_ao;
+    vec3 ambient = vec3(0.03) * albedo * u_ao;
     vec3 color = ambient + Lo;
 
     // HDR tonemapping - compress bright values
