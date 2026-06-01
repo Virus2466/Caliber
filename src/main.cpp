@@ -125,6 +125,7 @@ int main(){
         float lastFrame = 0.0f;
         bool s_tabWasPressed = false;
         glm::vec3 modelPosition(0.0f,0.0f,0.0f);
+        glm::vec3 modelRotation(0.0f,0.0f,0.0f);
         static glm::vec3 albedo(0.8f,0.8f,0.8f);
         static float metallic = 0.9f;
         static float roughness = 0.2f;
@@ -132,13 +133,13 @@ int main(){
 
         // Light Positions and colors
         glm::vec3 lightPositions[] ={
-            glm::vec3(2.0f,2.0f,2.0f),
-            glm::vec3(-2.0f,2.0f,2.0f),
+            glm::vec3(2.0f,3.0f,4.0f),
+            glm::vec3(-2.0f,3.0f,4.0f),
         };
 
         glm::vec3 lightColors[] = {
-            glm::vec3(150.0f,150.0f,150.0f),
-            glm::vec3(150.0f,150.0f,150.0f),
+            glm::vec3(10.0f,10.0f,10.0f),
+            glm::vec3(10.0f,10.0f,10.0f),
         };
 
 
@@ -186,6 +187,7 @@ int main(){
 
                 ImGui::Text("Transform");
                 ImGui::SliderFloat3("Position", &modelPosition.x, -50.0f, 50.0f);
+                ImGui::SliderFloat3("Rotation", &modelRotation.x, -180.0f, 180.0f);
                 ImGui::Separator();
 
                 ImGui::Text("PBR MATERIAL");
@@ -212,9 +214,9 @@ int main(){
             glm::mat4 model = glm::mat4(1.0f);
 
             model = glm::translate(model, modelPosition);
-            // model = glm::rotate(model,
-            //                     static_cast<float>(glfwGetTime()),
-            //                     glm::vec3(0.5f, 1.0f, 0.0f));
+            model = glm::rotate(model, glm::radians(modelRotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+            model = glm::rotate(model, glm::radians(modelRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+            model = glm::rotate(model, glm::radians(modelRotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
 
             // model = glm::scale(model, glm::vec3(1.0f));  
             glm::mat4 view       = camera.getViewMatrix();
