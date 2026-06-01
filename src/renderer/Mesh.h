@@ -15,14 +15,34 @@
 #include "renderer/Vertex.h"
 #include "renderer/Buffer.h"
 #include "renderer/Shader.h"
+#include "renderer/Texture.h"
+
+
 
 
 namespace Caliber{
 
+
+enum class TextureType{
+    Albedo,
+    Normal,
+    MetallicRoughness,
+    AO
+};
+
+struct MeshTexture{
+    Texture texture;
+    TextureType type;
+
+    MeshTexture(const std::string& path, TextureType t) : texture(path) , type(t) {} 
+};
+
+
+
 class Mesh{
 public:
     // constructor 
-    Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices);
+    Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices , std::vector<MeshTexture> textures);
 
     void draw(Shader& shader) const;
 
@@ -32,6 +52,7 @@ public:
 private:
     std::vector<Vertex> m_vertices;
     std::vector<uint32_t> m_indices;
+    std::vector<MeshTexture> m_textures;
 
     VertexArray m_vao;
     VertexBuffer m_vbo;

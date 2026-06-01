@@ -19,6 +19,7 @@
 #include<optional>
 #include<filesystem>
 
+#include "assimp/material.h"
 #include "renderer/Mesh.h"
 #include "renderer/Shader.h"
 
@@ -35,6 +36,7 @@ public:
 
     void draw(Shader& shader) const;
 
+
     [[nodiscard]] size_t getMeshCount() const {return m_meshes.size() ;}
 
 private:
@@ -44,6 +46,7 @@ private:
 
     void processNode(aiNode* node , const aiScene* scene);
     Mesh processMesh(aiMesh* mesh , const aiScene* scene);
+    void loadMaterialTextures(aiMaterial* material , aiTextureType type, TextureType texType , std::vector<MeshTexture>& out);
 
     
 };

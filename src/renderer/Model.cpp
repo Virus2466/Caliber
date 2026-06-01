@@ -5,6 +5,8 @@
  */
 
 #include "renderer/Model.h"
+#include "assimp/material.h"
+#include "renderer/Mesh.h"
 
 #include <cstdint>
 #include<iostream>
@@ -94,6 +96,7 @@ namespace Caliber{
     Mesh Model::processMesh(aiMesh* mesh ,[[maybe_unused]] const aiScene* scene){
         std::vector<Vertex> vertices;
         std::vector<uint32_t> indices;
+        std::vector<MeshTexture> textures;
 
         vertices.reserve(mesh->mNumVertices);
 
@@ -127,6 +130,14 @@ namespace Caliber{
                 vertex.texCoord = {0.0f , 0.0f};
             }
 
+            if(mesh->HasTangentsAndBitangents()){
+                vertex.tangent = {
+                    mesh->mTangents[i].x,
+                    mesh->mTangents[i].y,
+                    mesh->mTangents[i].z,
+                };
+            }
+
             vertices.push_back(vertex);
         }
 
@@ -138,9 +149,51 @@ namespace Caliber{
             }
         }
 
+
+        // Textures
+        if(mesh->mMaterialIndex >= 0){
+            aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+
+            // albedo - color
+            loadMaterialTextures(material , aiTextureType_BASE_COLOR , TextureType::Albedo, textures);
+            if(textures.empty()){
+                loadMaterialTextures(material, aiTextureType_DIFFUSE, TextureType::Albedo, textures);
+            }
+
+             // normal
+            loadMaterialTextures(material, aiTextureType_NORMALS, TextureType::Normal, textures);
+
+            // metallic roughness
+            loadMaterialTextures(material, aiTextureType_METALNESS, TextureType::MetallicRoughness, textures);
+
+            // AO
+            loadMaterialTextures(material, aiTextureType_AMBIENT_OCCLUSION, TextureType::AO, textures);
+        }
+
+
+
+
+
         std::cout << "[Model] Mesh : " << mesh->mNumVertices << "vertices, " << indices.size() << " indices\n";
 
-        return Mesh(std::move(vertices) , std::move(indices));
+        return Mesh(std::move(vertices) , std::move(indices) , std::move(textures));
+    }
+
+    void Model::loadMaterialTextures(aiMaterial* material, aiTextureType type, TextureType texType, std::vector<MeshTexture>& out){
+        for(uint32_t i = 0; i < material->GetTextureCount(type); i++){
+            aiString texturePath;
+
+            if(material->GetTexture(type, i, &texturePath) != AI_SUCCESS){
+                continue;
+            }
+
+            std::filesystem::path path(texturePath.C_Str());
+            if(path.is_relative()){
+                path = m_directory / path;
+            }
+
+            out.emplace_back(path.string(), texType);
+        }
     }
 
 } // namespace caliber
