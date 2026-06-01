@@ -1,5 +1,5 @@
 # Caliber
-Real-time gun animation engine built from scratch in C++20 and OpenGL 4.6.
+engine built from scratch in C++and OpenGL 4.6.
 
 ---
 
