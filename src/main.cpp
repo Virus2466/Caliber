@@ -108,7 +108,7 @@ int main(){
 
         // Load Model
         auto gunModel = Caliber::Model::load(
-            std::filesystem::current_path() / "assets" / "models" / "gun" / "scene.gltf"
+            std::filesystem::current_path() / "assets" / "models" / "9mm" / "scene.gltf"
         );
         if(!gunModel){
             std::cerr << "Failed to Load gun model\n";
@@ -138,8 +138,8 @@ int main(){
         };
 
         glm::vec3 lightColors[] = {
-            glm::vec3(10.0f,10.0f,10.0f),
-            glm::vec3(10.0f,10.0f,10.0f),
+            glm::vec3(30.0f,30.0f,30.0f),
+            glm::vec3(30.0f,30.0f,30.0f),
         };
 
 
@@ -211,7 +211,7 @@ int main(){
             ImGui::End();
 
             // -------------- RENDERING -----------------
-            glm::mat4 model = glm::mat4(1.0f);
+            glm::mat4 model = glm::mat4(0.4f);
 
             model = glm::translate(model, modelPosition);
             model = glm::rotate(model, glm::radians(modelRotation.x), glm::vec3(1.0f, 0.0f, 0.0f));

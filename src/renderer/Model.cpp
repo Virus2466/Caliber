@@ -66,7 +66,7 @@ namespace Caliber{
 
         Model model;
         model.m_directory = path.parent_path();
-        model.processNode(scene->mRootNode, scene);
+        model.processNode(scene->mRootNode, scene , glm::mat4(1.0f));
 
         return model;
     }
@@ -74,22 +74,41 @@ namespace Caliber{
 
 
 
-    void Model::draw(Shader& shader) const {
-        for(const auto& mesh : m_meshes){
-            mesh.draw(shader);
+    void Model::draw(Shader& shader,  const glm::mat4& parentTransform) const {
+        for(const auto& instance  : m_meshInstances){
+            glm::mat4 finalTransform = parentTransform * instance.localTransform;
+            shader.setVec4("u_model", finalTransform);
+            instance.mesh.draw(shader);
         }
     }
 
 
-    void Model::processNode(aiNode* node , const aiScene* scene){
+    void Model::processNode(aiNode* node , const aiScene* scene , const glm::mat4& parentTransform){
+        
+        auto& m = node->mTransformation;
+        glm::mat4 nodeTransform = glm::transpose(glm::mat4(
+        m.a1, m.a2, m.a3, m.a4,
+        m.b1, m.b2, m.b3, m.b4,
+        m.c1, m.c2, m.c3, m.c4,
+        m.d1, m.d2, m.d3, m.d4
+        ));
+
+        glm::mat4 globalTransform = parentTransform * nodeTransform;
+
+        
         // process all meshes in this node
         for(uint32_t i = 0 ; i < node->mNumMeshes; i++){
             aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+
+            MeshInstance instance;
+            instance.mesh           = processMesh(mesh, scene);
+            instance.localTransform = globalTransform;
+            instance.name           = node->mName.C_Str();
             m_meshes.push_back(processMesh(mesh,scene));
         }
         
         for(uint32_t i = 0; i < node->mNumChildren; i++){
-            processNode(node->mChildren[i], scene);
+            processNode(node->mChildren[i], scene , globalTransform);
         }
     }
 
