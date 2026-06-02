@@ -11,11 +11,11 @@ namespace Caliber{
         glBufferData(GL_ARRAY_BUFFER , size , data , GL_STATIC_DRAW);
     }
 
-    VertexBuffer::~VertexBuffer(){
-        if(m_id != 0){
-            glDeleteBuffers(1 , &m_id);
-        }
-    }
+    // VertexBuffer::~VertexBuffer(){
+    //     if(m_id != 0){
+    //         glDeleteBuffers(1 , &m_id);
+    //     }
+    // }
 
     // move 
     VertexBuffer::VertexBuffer(VertexBuffer&& other) noexcept 
@@ -39,11 +39,11 @@ namespace Caliber{
         glBufferData(GL_ELEMENT_ARRAY_BUFFER , count * sizeof(uint32_t) , data , GL_STATIC_DRAW);
     }
 
-    IndexBuffer::~IndexBuffer(){
-         if(m_id != 0){
-            glDeleteBuffers(1 , &m_id);
-        }
-    }
+    // IndexBuffer::~IndexBuffer(){
+    //      if(m_id != 0){
+    //         glDeleteBuffers(1 , &m_id);
+    //     }
+    // }
 
     IndexBuffer::IndexBuffer(IndexBuffer&& other) noexcept 
     : m_id(std::exchange(other.m_id, 0)),

@@ -24,7 +24,7 @@ static float s_lastY = 360.0f;
 static bool s_firstMouse = true;
 static bool s_cursorCaptured = true; 
 
-Caliber::Camera camera(glm::vec3(0.0f , 0.0f , 10.0f));
+Caliber::Camera camera(glm::vec3(0.0f , 0.0f , 5.0f));
 
 // ------------------- CALLBACKS ------------------ 
 void mouseCallBack(GLFWwindow*, double xpos , double ypos){
@@ -108,7 +108,7 @@ int main(){
 
         // Load Model
         auto gunModel = Caliber::Model::load(
-            std::filesystem::current_path() / "assets" / "models" / "9mm" / "scene.gltf"
+            std::filesystem::current_path() / "assets" / "models" / "gun" / "scene.gltf"
         );
         if(!gunModel){
             std::cerr << "Failed to Load gun model\n";
@@ -126,6 +126,7 @@ int main(){
         bool s_tabWasPressed = false;
         glm::vec3 modelPosition(0.0f,0.0f,0.0f);
         glm::vec3 modelRotation(0.0f,0.0f,0.0f);
+        float modelScale = 1.0f;
         static glm::vec3 albedo(0.8f,0.8f,0.8f);
         static float metallic = 0.9f;
         static float roughness = 0.2f;
@@ -188,6 +189,7 @@ int main(){
                 ImGui::Text("Transform");
                 ImGui::SliderFloat3("Position", &modelPosition.x, -50.0f, 50.0f);
                 ImGui::SliderFloat3("Rotation", &modelRotation.x, -180.0f, 180.0f);
+                ImGui::SliderFloat("Scale", &modelScale, 0.01f, 100.0f);
                 ImGui::Separator();
 
                 ImGui::Text("PBR MATERIAL");
@@ -211,14 +213,13 @@ int main(){
             ImGui::End();
 
             // -------------- RENDERING -----------------
-            glm::mat4 model = glm::mat4(0.4f);
+            glm::mat4 model = glm::mat4(1.0f);
 
             model = glm::translate(model, modelPosition);
             model = glm::rotate(model, glm::radians(modelRotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
             model = glm::rotate(model, glm::radians(modelRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
             model = glm::rotate(model, glm::radians(modelRotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-
-            // model = glm::scale(model, glm::vec3(1.0f));  
+            model = glm::scale(model, glm::vec3(modelScale));
             glm::mat4 view       = camera.getViewMatrix();
             glm::mat4 projection = camera.getProjectionMatrix(1280.0f / 720.0f);
 
@@ -249,7 +250,7 @@ int main(){
 
             // Draw Geometry
             //glDrawElements(GL_TRIANGLES, ibo.getCount(), GL_UNSIGNED_INT, 0);
-            gunModel->draw(shader);
+            gunModel->draw(shader,model);
 
 
             // Draw ImGui over the scene

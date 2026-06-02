@@ -13,7 +13,7 @@ namespace Caliber{
     , m_right(glm::vec3(1.0f, 0.0f , 0.0f))
     , m_yaw(-90.0f)
     , m_pitch(0.0f)
-    , m_speed(2.5f)
+    , m_speed(1.5f)
     , m_sensivity(0.1f)
     , m_fov(45.0f){ updateVectors();}
 

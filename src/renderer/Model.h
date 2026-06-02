@@ -53,7 +53,7 @@ public:
 
 private:
     Model() = default;
-    std::vector<Mesh>m_meshInstances;
+    std::vector<MeshInstance>m_meshInstances;
     std::filesystem::path m_directory;
 
     void processNode(aiNode* node , const aiScene* scene , const glm::mat4& parentTransform);

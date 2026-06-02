@@ -77,7 +77,7 @@ namespace Caliber{
     void Model::draw(Shader& shader,  const glm::mat4& parentTransform) const {
         for(const auto& instance  : m_meshInstances){
             glm::mat4 finalTransform = parentTransform * instance.localTransform;
-            shader.setVec4("u_model", finalTransform);
+            shader.setMat4("u_model", finalTransform);
             instance.mesh.draw(shader);
         }
     }
@@ -100,17 +100,21 @@ namespace Caliber{
         for(uint32_t i = 0 ; i < node->mNumMeshes; i++){
             aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 
-            MeshInstance instance;
-            instance.mesh           = processMesh(mesh, scene);
-            instance.localTransform = globalTransform;
-            instance.name           = node->mName.C_Str();
-            m_meshes.push_back(processMesh(mesh,scene));
+            MeshInstance instance {
+                processMesh(mesh, scene),  // 1. mesh
+                globalTransform,           // 2. localTransform
+                node->mName.C_Str()        // 3. name
+            };
+            std::cout << "Found Mesh Node: " << node->mName.C_Str() << "\n";
+
+            m_meshInstances.push_back(std::move(instance));
         }
         
         for(uint32_t i = 0; i < node->mNumChildren; i++){
             processNode(node->mChildren[i], scene , globalTransform);
         }
     }
+
 
     Mesh Model::processMesh(aiMesh* mesh ,[[maybe_unused]] const aiScene* scene){
         std::vector<Vertex> vertices;
@@ -213,6 +217,21 @@ namespace Caliber{
 
             out.emplace_back(path.string(), texType);
         }
+    }
+
+
+    MeshInstance* Model::findMesh(const std::string& name) {
+        for (auto& instance : m_meshInstances)
+            if (instance.name == name)
+                return &instance;
+        return nullptr;
+    }   
+
+    const MeshInstance* Model::findMesh(const std::string& name) const {
+            for (const auto& instance : m_meshInstances)
+                if (instance.name == name)
+                    return &instance;
+            return nullptr;
     }
 
 } // namespace caliber

@@ -17,7 +17,7 @@ namespace Caliber {
     public:
         VertexBuffer() : m_id(0) {}
         VertexBuffer(const float* data , uint32_t size);
-        ~VertexBuffer();
+        //~VertexBuffer();
   
         // Deleting copy constructor.
         VertexBuffer(const VertexBuffer&) = delete;
@@ -56,7 +56,7 @@ namespace Caliber {
             [[nodiscard]] uint32_t getID() const { return  m_id;}
 
             // Destructor -- kek
-            ~IndexBuffer();
+            //~IndexBuffer();
 
         private:
             uint32_t m_id{0};
