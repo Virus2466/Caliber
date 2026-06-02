@@ -82,9 +82,7 @@ int main(){
         std::cerr << "Failed to initialize GLAD\n";
         return -1;
     }
-    glEnable(GL_DEPTH_TEST);
-    glPolygonMode(GL_FRONT_AND_BACK , GL_FILL);
-    glDisable(GL_CULL_FACE);
+    
     
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -108,7 +106,7 @@ int main(){
 
         // Load Model
         auto gunModel = Caliber::Model::load(
-            std::filesystem::current_path() / "assets" / "models" / "gun" / "scene.gltf"
+            std::filesystem::current_path() / "assets" / "models" / "9mm" / "scene.gltf"
         );
         if(!gunModel){
             std::cerr << "Failed to Load gun model\n";
@@ -134,13 +132,13 @@ int main(){
 
         // Light Positions and colors
         glm::vec3 lightPositions[] ={
-            glm::vec3(2.0f,3.0f,4.0f),
-            glm::vec3(-2.0f,3.0f,4.0f),
+            glm::vec3(5.0f,5.0f,5.0f),
+            glm::vec3(-5.0f,5.0f,5.0f),
         };
 
         glm::vec3 lightColors[] = {
-            glm::vec3(30.0f,30.0f,30.0f),
-            glm::vec3(30.0f,30.0f,30.0f),
+            glm::vec3(300.0f,300.0f,300.0f),    
+            glm::vec3(300.0f,300.0f,300.0f),
         };
 
 
@@ -179,6 +177,13 @@ int main(){
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             // Add polygon mode here if needed.
 
+            glEnable(GL_DEPTH_TEST);
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+
+
             // -------------- UI SECTION -----------------
             Caliber::UI::beginFrame();
             
@@ -201,11 +206,11 @@ int main(){
 
                 ImGui::Separator();
                 ImGui::Text("Light 0");
-                ImGui::SliderFloat3("Position##L0" , &lightPositions[0].x , -5.0f , 5.0f);
+                ImGui::SliderFloat3("Position##L0" , &lightPositions[0].x , -50.0f , 50.0f);
                 ImGui::ColorEdit3("Color##L0" , &lightColors[0].x);
 
                 ImGui::Text("Light 1");
-                ImGui::SliderFloat3("Position##L1" , &lightPositions[1].x , -5.0f , 5.0f);
+                ImGui::SliderFloat3("Position##L1" , &lightPositions[1].x , -50.0f , 50.0f);
                 ImGui::ColorEdit3("ColorEdit##L1" , &lightColors[1].x);
 
 
