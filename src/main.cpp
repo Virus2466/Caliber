@@ -131,14 +131,16 @@ int main(){
         static float ao = 1.0f;
 
         // Light Positions and colors
-        glm::vec3 lightPositions[] ={
-            glm::vec3(5.0f,5.0f,5.0f),
-            glm::vec3(-5.0f,5.0f,5.0f),
+        glm::vec3 lightPositions[] = {
+            glm::vec3( 3.0f,  3.0f, 3.0f),
+            glm::vec3(-3.0f,  3.0f, 3.0f),
+            glm::vec3( 0.0f, -3.0f, 2.0f),
         };
 
         glm::vec3 lightColors[] = {
-            glm::vec3(300.0f,300.0f,300.0f),    
-            glm::vec3(300.0f,300.0f,300.0f),
+            glm::vec3(3.0f, 3.0f, 3.0f),
+            glm::vec3(2.0f, 2.0f, 2.0f),
+            glm::vec3(1.5f, 1.5f, 1.5f),
         };
 
 
@@ -207,11 +209,15 @@ int main(){
                 ImGui::Separator();
                 ImGui::Text("Light 0");
                 ImGui::SliderFloat3("Position##L0" , &lightPositions[0].x , -50.0f , 50.0f);
-                ImGui::ColorEdit3("Color##L0" , &lightColors[0].x);
+                ImGui::SliderFloat3("Color##L0" , &lightColors[0].x, 0.0f, 10.0f);
 
                 ImGui::Text("Light 1");
                 ImGui::SliderFloat3("Position##L1" , &lightPositions[1].x , -50.0f , 50.0f);
-                ImGui::ColorEdit3("ColorEdit##L1" , &lightColors[1].x);
+                ImGui::SliderFloat3("Color##L1" , &lightColors[1].x, 0.0f, 10.0f);
+
+                ImGui::Text("Light 2");
+                ImGui::SliderFloat3("Position##L2" , &lightPositions[2].x , -50.0f , 50.0f);
+                ImGui::SliderFloat3("Color##L2" , &lightColors[2].x, 0.0f, 10.0f);
 
 
 
@@ -235,7 +241,7 @@ int main(){
             shader.setFloat("u_metallic" , metallic);
             shader.setFloat("u_roughness",roughness);
             shader.setFloat("u_ao" ,ao);
-            shader.setInt("u_lightCount",2);
+            shader.setInt("u_lightCount",3);
             shader.setMat4("u_model",      model);
             shader.setMat4("u_view",       view);
             shader.setMat4("u_projection", projection);
@@ -243,7 +249,7 @@ int main(){
 
                     
             // upload light arrays
-            for (int i = 0; i < 2; i++) {
+            for (int i = 0; i < 3; i++) {
                 std::string pos   = "u_lightPositions[" + std::to_string(i) + "]";
                 std::string color = "u_lightColors["    + std::to_string(i) + "]";
                 shader.setVec3(pos,   lightPositions[i]);

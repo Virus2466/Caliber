@@ -14,12 +14,14 @@
 #include <assimp/Importer.hpp>
 #include<assimp/scene.h>
 #include<assimp/postprocess.h>
+#include <glm/geometric.hpp>
 #include <optional>
 
 namespace Caliber{
     std::optional<Model> Model::load(const std::filesystem::path& path){
-        std::cout << "[Model] Trying to load: " << std::filesystem::absolute(path)
-                    << "\n";
+        std::cout << "[Model] Trying to load: " << std::filesystem::absolute(path) << "\n";
+
+        
 
         // check if file exists before even trying Assimp
         if (!std::filesystem::exists(path)) {
@@ -33,7 +35,6 @@ namespace Caliber{
         const aiScene* scene = importer.ReadFile(path.string(),
             aiProcess_Triangulate | // convert all faces to triangle.
             aiProcess_GenSmoothNormals | // generate normals
-            aiProcess_FlipUVs | // flips UVs for OpenGL
             aiProcess_CalcTangentSpace // calculate tangents.
         );
 
@@ -125,7 +126,7 @@ namespace Caliber{
 
         // Vertices --
         for(uint32_t i = 0 ; i < mesh->mNumVertices ; i++){
-            Vertex vertex;
+            Vertex vertex{};
 
             // Position
             vertex.position = {
@@ -159,6 +160,13 @@ namespace Caliber{
                     mesh->mTangents[i].y,
                     mesh->mTangents[i].z,
                 };
+                vertex.bitangent = {
+                    mesh->mBitangents[i].x,
+                    mesh->mBitangents[i].y,
+                    mesh->mBitangents[i].z,
+                };
+            } else {
+                vertex.bitangent = glm::cross(vertex.normal, vertex.tangent);
             }
 
             vertices.push_back(vertex);
@@ -174,20 +182,28 @@ namespace Caliber{
 
 
         // Textures
-        if(mesh->mMaterialIndex >= 0){
+        if(mesh->mMaterialIndex < scene->mNumMaterials){
             aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-            // albedo - color
-            loadMaterialTextures(material , aiTextureType_BASE_COLOR , TextureType::Albedo, textures);
-            if(textures.empty()){
+            // albedo
+            size_t prevSize = textures.size();
+            loadMaterialTextures(material, aiTextureType_BASE_COLOR, TextureType::Albedo, textures);
+            if (textures.size() == prevSize)
                 loadMaterialTextures(material, aiTextureType_DIFFUSE, TextureType::Albedo, textures);
-            }
 
-             // normal
+            // normal
+            prevSize = textures.size();
             loadMaterialTextures(material, aiTextureType_NORMALS, TextureType::Normal, textures);
+            if (textures.size() == prevSize)
+                loadMaterialTextures(material, aiTextureType_HEIGHT, TextureType::Normal, textures);
 
             // metallic roughness
-            loadMaterialTextures(material, aiTextureType_METALNESS, TextureType::MetallicRoughness, textures);
+            prevSize = textures.size();
+            loadMaterialTextures(material, aiTextureType_GLTF_METALLIC_ROUGHNESS, TextureType::MetallicRoughness, textures);
+            if (textures.size() == prevSize)
+                loadMaterialTextures(material, aiTextureType_METALNESS, TextureType::MetallicRoughness, textures);
+            if (textures.size() == prevSize)
+                loadMaterialTextures(material, aiTextureType_DIFFUSE_ROUGHNESS, TextureType::MetallicRoughness, textures);
 
             // AO
             loadMaterialTextures(material, aiTextureType_AMBIENT_OCCLUSION, TextureType::AO, textures);
@@ -203,6 +219,8 @@ namespace Caliber{
     }
 
     void Model::loadMaterialTextures(aiMaterial* material, aiTextureType type, TextureType texType, std::vector<MeshTexture>& out){
+        std::cout << "[Model] Checking texture type" << type << " count: " << material->GetTextureCount(type) << '\n';
+        
         for(uint32_t i = 0; i < material->GetTextureCount(type); i++){
             aiString texturePath;
 
@@ -213,6 +231,11 @@ namespace Caliber{
             std::filesystem::path path(texturePath.C_Str());
             if(path.is_relative()){
                 path = m_directory / path;
+            }
+
+            if(!std::filesystem::exists(path)){
+                std::cerr << "[Model] Texture file missing: " << std::filesystem::absolute(path) << "\n";
+                continue;
             }
 
             out.emplace_back(path.string(), texType);

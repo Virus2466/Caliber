@@ -23,16 +23,20 @@ Texture::Texture(const std::filesystem::path& path){
 
     // load image(texture file)
     int channels;
-    stbi_set_flip_vertically_on_load(true);
+    stbi_set_flip_vertically_on_load(false);
     uint8_t* data = stbi_load(path.string().c_str(), &m_width, &m_height, &channels, 0);
     
     if(data){
         GLenum format = (channels == 4) ? GL_RGBA : GL_RGB;
         glTexImage2D(GL_TEXTURE_2D , 0 , format , m_width , m_height , 0 , format , GL_UNSIGNED_BYTE , data);
         glGenerateMipmap(GL_TEXTURE_2D);
+        m_loaded = true;
         std::cout << "[Texture] Loaded" << path << "(" << m_width << "x" << m_height << ")\n";
     } else{
-        std::cerr << "[Texture] Failed to load : " << path << "\n";
+        const char* reason = stbi_failure_reason();
+        std::cerr << "[Texture] Failed to load : " << path << " (" << (reason ? reason : "unknown") << ")\n";
+        glDeleteTextures(1, &m_id);
+        m_id = 0;
     }
 
     stbi_image_free(data);
@@ -48,7 +52,8 @@ Texture::~Texture(){
 Texture::Texture(Texture&& rhs) noexcept
     : m_id(std::exchange(rhs.m_id , 0)),
       m_width(std::exchange(rhs.m_width , 0)),
-      m_height(std::exchange(rhs.m_height, 0)){
+      m_height(std::exchange(rhs.m_height, 0)),
+      m_loaded(std::exchange(rhs.m_loaded, false)){
 }
 
 Texture& Texture::operator=(Texture&& rhs) noexcept{
@@ -57,12 +62,18 @@ Texture& Texture::operator=(Texture&& rhs) noexcept{
         m_id = std::exchange(rhs.m_id , 0);
         m_width = std::exchange(rhs.m_width , 0);
         m_height = std::exchange(rhs.m_height , 0);
+        m_loaded = std::exchange(rhs.m_loaded, false);
     }
 
     return *this;
 }
 
 void Texture::bind(uint32_t slot) const {
+    if(!m_loaded || m_id == 0){
+        std::cerr << "[Texture] Tried to bind an unloaded texture on slot " << slot << "\n";
+        return;
+    }
+
     glActiveTexture(GL_TEXTURE0 + slot);
     glBindTexture(GL_TEXTURE_2D , m_id);
 }

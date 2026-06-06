@@ -24,11 +24,13 @@ class Texture{
         [[nodiscard]] uint32_t getID() const {return m_id;}
         [[nodiscard]] int getWidth() const {return m_width;}
         [[nodiscard]] int getHeight() const {return m_height;}
+        [[nodiscard]] bool isLoaded() const {return m_loaded;}
 
     private:
         uint32_t m_id{0};
         int m_width{0};
         int m_height{0};
+        bool m_loaded{false};
 
 
 };

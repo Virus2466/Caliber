@@ -5,15 +5,18 @@
  * Matches the vertex layout expected by pbr.vert
  */
 
-#include<glm/glm.hpp>
+#pragma once
+
+#include <glm/glm.hpp>
 
 namespace Caliber{
 
 struct Vertex{
-    glm::vec3 position;
-    glm::vec3 normal;
-    glm::vec2 texCoord;
-    glm::vec3 tangent;
+    glm::vec3 position{0.0f};
+    glm::vec3 normal{0.0f, 1.0f, 0.0f};
+    glm::vec2 texCoord{0.0f};
+    glm::vec3 tangent{1.0f, 0.0f, 0.0f};
+    glm::vec3 bitangent{0.0f, 0.0f, 1.0f};
 };
 
 

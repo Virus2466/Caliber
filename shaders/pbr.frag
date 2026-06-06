@@ -3,6 +3,7 @@
 in vec3 v_fragPos;
 in vec3 v_normal;
 in vec2 v_texCoord;
+in mat3 v_TBN;
 
 
 out vec4 FragColor;
@@ -81,10 +82,19 @@ void main(){
     float roughness = u_hasMetallicRoughnessMap ? texture(u_metallicRoughnessMap , v_texCoord).g : u_roughness;
     float ao = u_hasAOMap ? texture(u_aoMap , v_texCoord).r : u_ao;
 
+    metallic = clamp(metallic, 0.0, 1.0);
+    roughness = clamp(roughness, 0.18, 1.0);
+    ao = clamp(ao, 0.0, 1.0);
 
 
 
-    vec3 N = u_hasNormalMap ? normalize(texture(u_normalMap , v_texCoord).rgb * 2.0 - 1.0) : normalize(v_normal);
+
+    vec3 N = normalize(v_normal);
+    if(u_hasNormalMap){
+        vec3 tangentNormal = texture(u_normalMap , v_texCoord).rgb * 2.0 - 1.0;
+        N = normalize(v_TBN * tangentNormal);
+    }
+
     vec3 V = normalize(u_viewPos - v_fragPos);
 
 
@@ -106,8 +116,8 @@ void main(){
         vec3 radiance = u_lightColors[i] * attenuation;
 
         // Cook Torrence BRDF
-        float D = distributionGGX(N,H,u_roughness);
-        float G = geometrySmith(N,V,L,u_roughness);
+        float D = distributionGGX(N,H,roughness);
+        float G = geometrySmith(N,V,L,roughness);
         vec3 F = fresnelSchilk(max(dot(H,V),0.0),F0);
 
         // specular
@@ -126,11 +136,11 @@ void main(){
     }
 
     // ambient
-    vec3 ambient = vec3(0.03) * albedo * u_ao;
+    vec3 ambient = vec3(0.18) * albedo * ao;
     vec3 color = ambient + Lo;
 
-    // HDR tonemapping - compress bright values
-    color = color / (color + vec3(1.0));
+    // HDR tonemapping - compress bright values without blowing broad areas to white.
+    color = vec3(1.0) - exp(-color * 0.9);
 
     // gamma correction
     color = pow(color , vec3(1.0/2.2));

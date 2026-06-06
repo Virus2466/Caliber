@@ -90,47 +90,22 @@ target_compile_options(Caliber PRIVATE
     $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>
 )
 
-add_custom_command(TARGET Caliber POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_SOURCE_DIR}/shaders
-    $<TARGET_FILE_DIR:Caliber>/shaders
-)
-
-add_custom_command(TARGET Caliber POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_SOURCE_DIR}/assets
-    $<TARGET_FILE_DIR:Caliber>/assets
-)
-
-
 # collect shader files
 file(GLOB_RECURSE SHADER_FILES
     "${CMAKE_SOURCE_DIR}/shaders/*.vert"
     "${CMAKE_SOURCE_DIR}/shaders/*.frag"
 )
 
-# custom target that always copies shaders
-add_custom_target(CopyShaders ALL
+add_custom_target(CopyShaders
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_SOURCE_DIR}/shaders
     $<TARGET_FILE_DIR:Caliber>/shaders
     COMMENT "Copying shaders..."
 )
 
-add_dependencies(Caliber CopyShaders)
-
-add_custom_command(TARGET Caliber POST_BUILD
+add_custom_target(CopyAssets
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_SOURCE_DIR}/assets
     $<TARGET_FILE_DIR:Caliber>/assets
     COMMENT "Copying assets..."
 )
-
-add_custom_target(CopyAssets ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_SOURCE_DIR}/assets
-    $<TARGET_FILE_DIR:Caliber>/assets
-    COMMENT "Copying assets..."
-)
-
-add_dependencies(Caliber CopyAssets)

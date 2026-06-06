@@ -48,6 +48,9 @@ void Mesh::setupMesh(){
     // tangent - location - 3
     m_vao.addAttribute(3, 3, sizeof(Vertex), offsetof(Vertex, tangent));
 
+    // bitangent - location 4
+    m_vao.addAttribute(4, 3, sizeof(Vertex), offsetof(Vertex, bitangent));
+
     m_vao.unbind();
 
 }
@@ -64,6 +67,10 @@ void Mesh::draw([[maybe_unused]] Shader& shader) const {
     bool hasAO = false;
 
     for(const auto& meshTex : m_textures){
+        if(!meshTex.texture.isLoaded()){
+            continue;
+        }
+
         switch(meshTex.type){
             case TextureType::Albedo:
                 meshTex.texture.bind(albedoSlot);
