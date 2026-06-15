@@ -91,11 +91,9 @@ void main(){
 
     vec3 N = normalize(v_normal);
     if (u_hasNormalMap) {
-    // sample normal map
     vec3 tangentNormal = texture(u_normalMap, v_texCoord).rgb * 2.0 - 1.0;
-    // blend between vertex normal and normal map
     N = normalize(v_normal + tangentNormal * 0.5);
-}
+    }
 
 
     vec3 V = normalize(u_viewPos - v_fragPos);
