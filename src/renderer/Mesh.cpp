@@ -20,19 +20,7 @@ Mesh::Mesh(std::vector<Vertex> vertices , std::vector<uint32_t> indices , std::v
 
 void Mesh::setupMesh(){
     m_vao.bind();
-
-    // upload vertex data
-    m_vbo = VertexBuffer(
-        reinterpret_cast<const float*>(m_vertices.data()),
-        static_cast<uint32_t>(m_vertices.size() * sizeof(Vertex))
-    );
     m_vbo.bind();
-
-    // upload index data
-    m_ibo = IndexBuffer(
-        m_indices.data(),
-        static_cast<uint32_t>(m_indices.size())
-    );
     m_ibo.bind();
 
     // position — location 0
@@ -74,7 +62,7 @@ void Mesh::draw([[maybe_unused]] Shader& shader) const {
         switch(meshTex.type){
             case TextureType::Albedo:
                 meshTex.texture.bind(albedoSlot);
-                shader.setInt("u_albedoMap" , albedoSlot);
+                shader.setInt("u_albedoMap" , 0);
                 shader.setBool("u_hasAlbedoMap", true);
                 hasAlbedo = true;
                 break;

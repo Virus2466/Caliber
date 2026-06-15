@@ -96,16 +96,18 @@ file(GLOB_RECURSE SHADER_FILES
     "${CMAKE_SOURCE_DIR}/shaders/*.frag"
 )
 
-add_custom_target(CopyShaders
+add_custom_target(CopyShaders ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_SOURCE_DIR}/shaders
     $<TARGET_FILE_DIR:Caliber>/shaders
     COMMENT "Copying shaders..."
 )
 
-add_custom_target(CopyAssets
+add_custom_target(CopyAssets ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_SOURCE_DIR}/assets
     $<TARGET_FILE_DIR:Caliber>/assets
     COMMENT "Copying assets..."
 )
+
+add_dependencies(Caliber CopyShaders CopyAssets)

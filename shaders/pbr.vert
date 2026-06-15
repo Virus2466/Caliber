@@ -4,7 +4,7 @@ layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoord;
 layout (location = 3) in vec3 aTangent;
-layout (location = 4) in vec3 aBitangent;
+// layout (location = 4) in vec3 aBitangent;
 
 uniform mat4 u_model;
 uniform mat4 u_view;
@@ -23,12 +23,9 @@ void main(){
     vec3 N = normalize(normalMatrix * aNormal);
     vec3 T = normalize(normalMatrix * aTangent);
     T = normalize(T - dot(T, N) * N);
-    vec3 importedB = normalize(normalMatrix * aBitangent);
-    float handedness = dot(cross(N, T), importedB) < 0.0 ? -1.0 : 1.0;
-    vec3 B = normalize(cross(N, T)) * handedness;
+    vec3 B = normalize(cross(N, T));
 
     v_normal = N;
     v_TBN = mat3(T, B, N);
-    
     v_texCoord = aTexCoord; 
 }

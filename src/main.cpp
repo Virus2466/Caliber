@@ -56,6 +56,8 @@ void scrollCallBack(GLFWwindow*, double, double yOffset){
 
 // ------------------- MAIN ------------------ 
 int main(){
+    std::cout << "BUILD TIME: " << __DATE__ << " " << __TIME__ << "\n";
+
     // Initialize GLFW
     if(!glfwInit()){
         std::cerr << "Failed to initiate GLFW\n";
@@ -89,10 +91,11 @@ int main(){
     glfwSetCursorPosCallback(window, mouseCallBack);
     glfwSetScrollCallback(window, scrollCallBack);
 
+
     Caliber::UI::init(window);
 
     std::cout << "OpenGL " << glGetString(GL_VERSION) << "\n";
-    std::cout << "Caliber Running...\n";
+    std::cout << "Caliber Running[......]\n";
     std::cout << "Working directory: " << std::filesystem::current_path() << "\n";
 
     { 
@@ -111,6 +114,7 @@ int main(){
         if(!gunModel){
             std::cerr << "Failed to Load gun model\n";
             return -1;
+            
         }
 
         std::cout << "[Debug] Camera pos: " 
@@ -132,15 +136,15 @@ int main(){
 
         // Light Positions and colors
         glm::vec3 lightPositions[] = {
-            glm::vec3( 3.0f,  3.0f, 3.0f),
-            glm::vec3(-3.0f,  3.0f, 3.0f),
-            glm::vec3( 0.0f, -3.0f, 2.0f),
+            glm::vec3( 0.5f,  0.5f, 0.5f),
+            glm::vec3(-0.5,  0.5f, 0.5f),
+            glm::vec3( 0.0f, -0.3f, 0.3f),
         };
 
         glm::vec3 lightColors[] = {
             glm::vec3(3.0f, 3.0f, 3.0f),
             glm::vec3(2.0f, 2.0f, 2.0f),
-            glm::vec3(1.5f, 1.5f, 1.5f),
+            glm::vec3(1.0f, 1.0f, 1.0f),
         };
 
 

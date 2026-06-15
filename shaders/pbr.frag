@@ -90,10 +90,13 @@ void main(){
 
 
     vec3 N = normalize(v_normal);
-    if(u_hasNormalMap){
-        vec3 tangentNormal = texture(u_normalMap , v_texCoord).rgb * 2.0 - 1.0;
-        N = normalize(v_TBN * tangentNormal);
-    }
+    if (u_hasNormalMap) {
+    // sample normal map
+    vec3 tangentNormal = texture(u_normalMap, v_texCoord).rgb * 2.0 - 1.0;
+    // blend between vertex normal and normal map
+    N = normalize(v_normal + tangentNormal * 0.5);
+}
+
 
     vec3 V = normalize(u_viewPos - v_fragPos);
 
@@ -136,7 +139,7 @@ void main(){
     }
 
     // ambient
-    vec3 ambient = vec3(0.18) * albedo * ao;
+    vec3 ambient = vec3(0.15) * albedo * ao;
     vec3 color = ambient + Lo;
 
     // HDR tonemapping - compress bright values without blowing broad areas to white.
@@ -145,8 +148,7 @@ void main(){
     // gamma correction
     color = pow(color , vec3(1.0/2.2));
 
-    FragColor = vec4(color , 1.0);
-
+    FragColor = vec4(color, 1.0);
 
 
 }
