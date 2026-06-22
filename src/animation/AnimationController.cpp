@@ -14,9 +14,9 @@ AnimationController::AnimationController(Model& model) : m_model(model) { initPa
 
 void AnimationController::initParts(){
     // find named mesh instances
-    m_slide.instance = m_model.findMesh("slide_pistol_0");
-    m_trigger.instance = m_model.findMesh("trigger_pistol_0");
-    m_magazine.instance = m_model.findMesh("mag_pistol_0");
+    m_slide.instance = m_model.findMesh("Slide_Helwan_0");
+    m_trigger.instance = m_model.findMesh("Trigger_Helwan_0");
+    m_magazine.instance = m_model.findMesh("Magazine_Helwan_Mag_0");
 
     // store base transforms - idle
     if(m_slide.instance){
@@ -95,7 +95,7 @@ void AnimationController::updateFire(float deltaTime){
 
         if(m_slide.instance){
             glm::mat4 slideAnim = m_slide.baseTransform;
-            slideAnim = glm::translate(slideAnim, glm::vec3(0.0f , 0.0f , glm::mix(0.0f , -0.8f , t)));
+            slideAnim = glm::translate(slideAnim, glm::vec3(0.0f , glm::mix(0.0f , 0.8f , t) , 0.0f));
             m_slide.instance->localTransform = slideAnim;
         }
 
@@ -120,7 +120,7 @@ void AnimationController::updateFire(float deltaTime){
 
         if(m_slide.instance){
             glm::mat4 slideAnim = m_slide.baseTransform;
-            slideAnim = glm::translate(slideAnim, glm::vec3(0.0f , 0.0f , glm::mix(-0.8f , 0.0f , t)));
+            slideAnim = glm::translate(slideAnim, glm::vec3(0.0f , glm::mix(0.8f , 0.0f , t) , 0.0f));
             m_slide.instance->localTransform = slideAnim;
         }
 
@@ -165,7 +165,7 @@ void AnimationController::updateReload([[maybe_unused]] float deltaTime){
 
         if(m_magazine.instance){
             glm::mat4 magAnim = m_magazine.baseTransform;
-            magAnim = glm::translate(magAnim, glm::vec3(0.0f , glm::mix(0.0f , -0.15f , t), 0.0f));
+            magAnim = glm::translate(magAnim, glm::vec3(0.0f , 0.0f , glm::mix(0.0f , -1.5f , t)));
             m_magazine.instance->localTransform = magAnim;
         }
     }
@@ -176,7 +176,7 @@ void AnimationController::updateReload([[maybe_unused]] float deltaTime){
 
         if(m_magazine.instance){
             glm::mat4 magAnim = m_magazine.baseTransform;
-            magAnim = glm::translate(magAnim, glm::vec3(0.0f , glm::mix(-0.15f , 0.0f , t), 0.0f));
+            magAnim = glm::translate(magAnim, glm::vec3(0.0f , 0.0f , glm::mix(-1.5f , 0.0f , t)));
             m_magazine.instance->localTransform = magAnim;
         }
 

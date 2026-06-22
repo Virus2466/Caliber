@@ -111,7 +111,7 @@ int main(){
 
         // Load Model
         auto gunModel = Caliber::Model::load(
-            std::filesystem::current_path() / "assets" / "models" / "gun" / "scene.gltf"
+            std::filesystem::current_path() / "assets" / "models" / "m19" / "scene.gltf"
         );
         if(!gunModel){
             std::cerr << "Failed to Load gun model\n";
