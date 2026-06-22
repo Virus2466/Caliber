@@ -1,6 +1,7 @@
 # Caliber
-engine built from scratch in C++and OpenGL 4.6.
-<img width="1774" height="887" alt="caliber" src="https://github.com/user-attachments/assets/934f98eb-c572-4852-864a-f4e39cb9d622" />
+<img width="1774" height="407" alt="caliber" src="https://github.com/user-attachments/assets/3f59f587-dfff-45b5-aa14-cd499c839704" />
+Engine built from scratch in C++and OpenGL 4.6.
+
 
 
 
