@@ -165,7 +165,11 @@ void AnimationController::updateReload([[maybe_unused]] float deltaTime){
 
         if(m_magazine.instance){
             glm::mat4 magAnim = m_magazine.baseTransform;
-            magAnim = glm::translate(magAnim, glm::vec3(0.0f , 0.0f , glm::mix(0.0f , -1.5f , t)));
+            //calculate the diagonal
+            float dropZ = glm::mix(0.0f, -1.5f , t);
+            float slantY = glm::mix(0.0f , 0.4f , t);
+
+            magAnim = glm::translate(magAnim,glm::vec3(0.0f , slantY , dropZ));
             m_magazine.instance->localTransform = magAnim;
         }
     }
@@ -176,7 +180,11 @@ void AnimationController::updateReload([[maybe_unused]] float deltaTime){
 
         if(m_magazine.instance){
             glm::mat4 magAnim = m_magazine.baseTransform;
-            magAnim = glm::translate(magAnim, glm::vec3(0.0f , 0.0f , glm::mix(-1.5f , 0.0f , t)));
+            // reverse the diagonal path
+            float dropZ = glm::mix(-1.5f , 0.0f , t);
+            float slantY = glm::mix(0.4f , 0.0f , t);
+
+            magAnim = glm::translate(magAnim, glm::vec3(0.0f , slantY, dropZ));
             m_magazine.instance->localTransform = magAnim;
         }
 

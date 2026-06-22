@@ -150,9 +150,9 @@ int main(){
         };
 
         glm::vec3 lightColors[] = {
-            glm::vec3(3.0f, 3.0f, 3.0f),
-            glm::vec3(2.0f, 2.0f, 2.0f),
-            glm::vec3(1.0f, 1.0f, 1.0f),
+            glm::vec3(8.0f, 8.0f, 8.0f),
+            glm::vec3(8.0f, 8.0f, 8.0f),
+            glm::vec3(8.0f, 8.0f, 8.0f),
         };
 
 
