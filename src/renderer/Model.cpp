@@ -106,7 +106,7 @@ namespace Caliber{
                 globalTransform,           // 2. localTransform
                 node->mName.C_Str()        // 3. name
             };
-            std::cout << "Found Mesh Node: " << node->mName.C_Str() << "\n";
+            std::cout << "[Model] Mesh Node: " << node->mName.C_Str() << "\n";
 
             m_meshInstances.push_back(std::move(instance));
         }

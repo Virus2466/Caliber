@@ -14,9 +14,9 @@ AnimationController::AnimationController(Model& model) : m_model(model) { initPa
 
 void AnimationController::initParts(){
     // find named mesh instances
-    m_slide.instance = m_model.findMesh("GL_Slide_GL19_Metal_0");
-    m_trigger.instance = m_model.findMesh("GL_Trigger_GL19_Plastic_0");
-    m_magazine.instance = m_model.findMesh("GL_Magazine_GL19_Metal_0");
+    m_slide.instance = m_model.findMesh("slide_pistol_0");
+    m_trigger.instance = m_model.findMesh("trigger_pistol_0");
+    m_magazine.instance = m_model.findMesh("mag_pistol_0");
 
     // store base transforms - idle
     if(m_slide.instance){

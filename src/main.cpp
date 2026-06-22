@@ -9,11 +9,13 @@
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/fwd.hpp"
 
+
 #include "renderer/Shader.h"
 #include "scene/Camera.h"
 #include "core/UI.h"
 #include "renderer/Model.h"
 #include <imgui.h>
+#include "animation/AnimationController.h"
 
 
 
@@ -116,6 +118,8 @@ int main(){
             return -1;
             
         }
+        // Animation Controller
+        Caliber::AnimationController anim(*gunModel);
 
         std::cout << "[Debug] Camera pos: " 
           << camera.getPosition().x << ", "
@@ -133,6 +137,10 @@ int main(){
         static float metallic = 0.9f;
         static float roughness = 0.2f;
         static float ao = 1.0f;
+
+        // fire/reload inputs
+        static bool s_fWasPreseed = false;
+        static bool s_rWasPressed = false;
 
         // Light Positions and colors
         glm::vec3 lightPositions[] = {
@@ -178,6 +186,19 @@ int main(){
                 glfwSetWindowShouldClose(window, true);
             }
 
+            // fire
+            bool fPressed = glfwGetKey(window , GLFW_KEY_F) == GLFW_PRESS;
+            if(fPressed && !s_fWasPreseed) anim.triggerFire();
+            s_fWasPreseed = fPressed;
+
+            // reload
+            bool rPressed = glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS;
+            if(rPressed && !s_rWasPressed) anim.triggerReload();
+            s_rWasPressed = rPressed;
+
+            // update animation
+            anim.update(deltaTime);
+
             // clear BOTH buffers at the TOP
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -208,6 +229,12 @@ int main(){
                 ImGui::SliderFloat("Metallic",  &metallic,0.0f, 1.0f);
                 ImGui::SliderFloat("Roughness",      &roughness,  0.0f, 1.0f);
                 ImGui::SliderFloat("AO",             &ao,         0.0f, 1.0f);
+                ImGui::Separator();
+                ImGui::Text("Animation");
+                const char* stateNames[] = {"Idle" , "Fire" , "Reload" , "Inspect"};
+                ImGui::Text("State: %s", stateNames[static_cast<int>(anim.getState())]);
+                ImGui::Text("Press F to Fire , R to Reload");
+
 
 
                 ImGui::Separator();
@@ -230,11 +257,21 @@ int main(){
             // -------------- RENDERING -----------------
             glm::mat4 model = glm::mat4(1.0f);
 
-            model = glm::translate(model, modelPosition);
-            model = glm::rotate(model, glm::radians(modelRotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-            model = glm::rotate(model, glm::radians(modelRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-            model = glm::rotate(model, glm::radians(modelRotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+            // apply recoil and rotation
+            glm::vec3 recoilOffset = anim.getRecoilOffset();
+            glm::vec3 recoilRotation = anim.getRecoilRotation();
+
+            model = glm::translate(model , modelPosition + recoilOffset);
+            model = glm::rotate(model , glm::radians(modelRotation.x + recoilRotation.x) , glm::vec3(1.0f,0.0f,0.0f));
+            model = glm::rotate(model , glm::radians(modelRotation.y ) , glm::vec3(0.0f,1.0f,0.0f));
+            model = glm::rotate(model , glm::radians(modelRotation.z ) , glm::vec3(0.0f,0.0f,1.0f));
             model = glm::scale(model, glm::vec3(modelScale));
+
+            // model = glm::translate(model, modelPosition);
+            // model = glm::rotate(model, glm::radians(modelRotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+            // model = glm::rotate(model, glm::radians(modelRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+            // model = glm::rotate(model, glm::radians(modelRotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+           
             glm::mat4 view       = camera.getViewMatrix();
             glm::mat4 projection = camera.getProjectionMatrix(1280.0f / 720.0f);
 
