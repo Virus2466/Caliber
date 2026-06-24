@@ -18,7 +18,9 @@ add_executable(Caliber
     src/scene/Camera.cpp
     external/stb/stb_image.cpp
     src/animation/AnimationController.h
-    src/animation/AnimationController.cpp      # GLAD compiled directly with project
+    src/animation/AnimationController.cpp
+    src/scene/Viewmodel.h    # GLAD compiled directly with project
+    src/scene/Viewmodel.cpp  
 )
 
 # ── Include Directories ───────────────────────────────────────

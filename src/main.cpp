@@ -1,4 +1,3 @@
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -16,6 +15,9 @@
 #include "renderer/Model.h"
 #include <imgui.h>
 #include "animation/AnimationController.h"
+#include "scene/Viewmodel.h"
+
+
 
 
 
@@ -25,12 +27,25 @@ static float s_lastX = 640.0f;
 static float s_lastY = 360.0f;
 static bool s_firstMouse = true;
 static bool s_cursorCaptured = true; 
+// globals for viewmodel
+static float s_mouseDeltaX =  0.0f;
+static float s_mouseDeltaY = 0.0f;
+
 
 Caliber::Camera camera(glm::vec3(0.0f , 0.0f , 5.0f));
 
+Caliber::Viewmodel viewmodel;
+
+
+
+
+
+
+
+
 // ------------------- CALLBACKS ------------------ 
 void mouseCallBack(GLFWwindow*, double xpos , double ypos){
-    if(!s_cursorCaptured) return;
+    if(s_cursorCaptured){
     
     if(s_firstMouse){
         s_lastX = static_cast<float>(xpos);
@@ -38,20 +53,24 @@ void mouseCallBack(GLFWwindow*, double xpos , double ypos){
         s_firstMouse = false;
     }
 
-    float xOffset = static_cast<float>(xpos) - s_lastX;
-    float yOffset = s_lastY - static_cast<float>(ypos); // inverted
+    s_mouseDeltaX = static_cast<float>(xpos) - s_lastX;
+    s_mouseDeltaY = -(static_cast<float>(ypos) - s_lastY); // inverted
     s_lastX = static_cast<float>(xpos);
     s_lastY = static_cast<float>(ypos);
     
-    camera.processMouse(xOffset, yOffset);
+    camera.processMouse(s_mouseDeltaX, s_mouseDeltaY);
+    }
+    else{
+        s_mouseDeltaX = 0.0f;
+        s_mouseDeltaY = 0.0f;
+        s_firstMouse  = true;
+    }
 }
 
 void scrollCallBack(GLFWwindow*, double, double yOffset){
     if(!s_cursorCaptured) return; 
     camera.processScroll(static_cast<float>(yOffset));
 }
-
-
 
 
 
@@ -199,6 +218,7 @@ int main(){
             // update animation
             anim.update(deltaTime);
 
+
             // clear BOTH buffers at the TOP
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -235,6 +255,17 @@ int main(){
                 ImGui::Text("State: %s", stateNames[static_cast<int>(anim.getState())]);
                 ImGui::Text("Press F to Fire , R to Reload");
 
+                ImGui::Separator();
+                ImGui::Text("Viewmodel Sway");
+                static float swayAmount  = 0.002f;
+                static float swaySpeed   = 8.0f;
+                static float returnSpeed = 4.0f;
+                ImGui::SliderFloat("Sway Amount",  &swayAmount,  0.0f, 0.02f);
+                ImGui::SliderFloat("Sway Speed",   &swaySpeed,   1.0f, 20.0f);
+                ImGui::SliderFloat("Return Speed", &returnSpeed, 1.0f, 10.0f);
+                viewmodel.setSwayAmount(swayAmount);
+                viewmodel.setSwaySpeed(swaySpeed);
+                viewmodel.setReturnSpeed(returnSpeed);
 
 
                 ImGui::Separator();
@@ -255,22 +286,32 @@ int main(){
             ImGui::End();
 
             // -------------- RENDERING -----------------
-            glm::mat4 model = glm::mat4(1.0f);
-
-            // apply recoil and rotation
-            glm::vec3 recoilOffset = anim.getRecoilOffset();
-            glm::vec3 recoilRotation = anim.getRecoilRotation();
-
-            model = glm::translate(model , modelPosition + recoilOffset);
-            model = glm::rotate(model , glm::radians(modelRotation.x + recoilRotation.x) , glm::vec3(1.0f,0.0f,0.0f));
-            model = glm::rotate(model , glm::radians(modelRotation.y ) , glm::vec3(0.0f,1.0f,0.0f));
-            model = glm::rotate(model , glm::radians(modelRotation.z ) , glm::vec3(0.0f,0.0f,1.0f));
-            model = glm::scale(model, glm::vec3(modelScale));
+            // model = glm::translate(model , modelPosition + recoilOffset);
+            // model = glm::rotate(model , glm::radians(modelRotation.x + recoilRotation.x) , glm::vec3(1.0f,0.0f,0.0f));
+            // model = glm::rotate(model , glm::radians(modelRotation.y ) , glm::vec3(0.0f,1.0f,0.0f));
+            // model = glm::rotate(model , glm::radians(modelRotation.z ) , glm::vec3(0.0f,0.0f,1.0f));
+            // model = glm::scale(model, glm::vec3(modelScale));
 
             // model = glm::translate(model, modelPosition);
             // model = glm::rotate(model, glm::radians(modelRotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
             // model = glm::rotate(model, glm::radians(modelRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
             // model = glm::rotate(model, glm::radians(modelRotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+            // glm::mat4 model = glm::mat4(1.0f);
+
+            // apply recoil and rotation
+            glm::vec3 recoilOffset = anim.getRecoilOffset();
+            glm::vec3 recoilRotation = anim.getRecoilRotation();
+
+            viewmodel.update(glm::vec2(s_mouseDeltaX, s_mouseDeltaY), deltaTime);
+
+            glm::vec3 finalPosition = modelPosition + recoilOffset;
+            glm::vec3 finalRotation = glm::vec3(
+                modelPosition.x + recoilRotation.x,
+                modelPosition.y,
+                modelPosition.z
+            );
+
+            glm::mat4 model = viewmodel.getTransform(finalPosition, finalRotation, modelScale);
            
             glm::mat4 view       = camera.getViewMatrix();
             glm::mat4 projection = camera.getProjectionMatrix(1280.0f / 720.0f);

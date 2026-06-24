@@ -24,7 +24,7 @@ void AnimationController::initParts(){
     }
     if(m_trigger.instance){
         m_trigger.baseTransform = m_trigger.instance->localTransform;
-    }
+    }                                       
     if(m_magazine.instance){
         m_magazine.baseTransform = m_magazine.instance->localTransform;
     }
