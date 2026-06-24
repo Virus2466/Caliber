@@ -5,7 +5,6 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include "glm/ext/matrix_transform.hpp"
 #include "glm/fwd.hpp"
 
 
@@ -21,6 +20,14 @@
 
 
 
+// Muzzle Flash State.
+static bool s_muzzleFlash = false;
+static float s_muzzleFlashTime = 0.0f;
+static constexpr float MUZZLE_FLASH_DURATION = 0.05f;
+
+
+
+
 
 // ------------------- MOUSE STATE ------------------ 
 static float s_lastX = 640.0f;
@@ -32,15 +39,12 @@ static float s_mouseDeltaX =  0.0f;
 static float s_mouseDeltaY = 0.0f;
 
 
+
+
+
 Caliber::Camera camera(glm::vec3(0.0f , 0.0f , 5.0f));
 
 Caliber::Viewmodel viewmodel;
-
-
-
-
-
-
 
 
 // ------------------- CALLBACKS ------------------ 
@@ -207,8 +211,18 @@ int main(){
 
             // fire
             bool fPressed = glfwGetKey(window , GLFW_KEY_F) == GLFW_PRESS;
-            if(fPressed && !s_fWasPreseed) anim.triggerFire();
+            if(fPressed && !s_fWasPreseed) {
+                anim.triggerFire();
+                s_muzzleFlash = true;
+                s_muzzleFlashTime = 0.0f;
+            }
             s_fWasPreseed = fPressed;
+
+            if (s_muzzleFlash) {
+                s_muzzleFlashTime += deltaTime;
+            if (s_muzzleFlashTime >= MUZZLE_FLASH_DURATION)
+                s_muzzleFlash = false;
+            }
 
             // reload
             bool rPressed = glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS;
@@ -306,13 +320,14 @@ int main(){
 
             glm::vec3 finalPosition = modelPosition + recoilOffset;
             glm::vec3 finalRotation = glm::vec3(
-                modelPosition.x + recoilRotation.x,
-                modelPosition.y,
-                modelPosition.z
+                modelRotation.x + recoilRotation.x,
+                modelRotation.y,
+                modelRotation.z
             );
 
             glm::mat4 model = viewmodel.getTransform(finalPosition, finalRotation, modelScale);
            
+            
             glm::mat4 view       = camera.getViewMatrix();
             glm::mat4 projection = camera.getProjectionMatrix(1280.0f / 720.0f);
 
@@ -323,13 +338,13 @@ int main(){
             shader.setFloat("u_metallic" , metallic);
             shader.setFloat("u_roughness",roughness);
             shader.setFloat("u_ao" ,ao);
-            shader.setInt("u_lightCount",3);
+            // shader.setInt("u_lightCount",3);
             shader.setMat4("u_model",      model);
             shader.setMat4("u_view",       view);
             shader.setMat4("u_projection", projection);
             shader.setVec3("u_viewPos", camera.getPosition());
-
-                    
+            
+            
             // upload light arrays
             for (int i = 0; i < 3; i++) {
                 std::string pos   = "u_lightPositions[" + std::to_string(i) + "]";
@@ -337,7 +352,19 @@ int main(){
                 shader.setVec3(pos,   lightPositions[i]);
                 shader.setVec3(color, lightColors[i]);
             }
+            
+            // muzzle flash light — only active for 50ms after firing
+            // glm::vec3 muzzlePos   = modelPosition + glm::vec3(0.0f, 0.0f, 0.3f);
+            glm::vec3 muzzleColor = s_muzzleFlash 
+                      ? glm::vec3(800.0f, 500.0f, 200.0f)  // warm orange flash
+                      : glm::vec3(0.0f);               // off
 
+            glm::vec4 localBarrelTip = glm::vec4(0.0f, 3.5f, -2.5f, 1.0f);
+            glm::vec3 muzzlePos = glm::vec3(model * localBarrelTip);
+
+            shader.setVec3("u_lightPositions[3]", muzzlePos);
+            shader.setVec3("u_lightColors[3]",    muzzleColor);
+            shader.setInt ("u_lightCount", 4);
 
             
 
@@ -345,7 +372,7 @@ int main(){
             //glDrawElements(GL_TRIANGLES, ibo.getCount(), GL_UNSIGNED_INT, 0);
             gunModel->draw(shader,model);
 
-
+            
             // Draw ImGui over the scene
             Caliber::UI::endFrame();
 
