@@ -29,7 +29,7 @@ cmake --build .
 
 ## Gallery
 
-###Features and Working
+
 <video width="100%" autoplay loop muted controls>
   <source src="YOUR_GITHUB_ASSET_LINK_HERE.mp4](https://github.com/user-attachments/assets/1b13a419-2b14-4d8e-b709-77147f50b78a" type="video/mp4">
 </video>
@@ -39,9 +39,3 @@ cmake --build .
 
 <img width="1274" height="716" alt="Screenshot 2026-05-26 124959" src="https://github.com/user-attachments/assets/ab84fb5b-3945-49bf-b041-cda47381b129" />
 
-
-
-
-
-
-https://github.com/user-attachments/assets/1b13a419-2b14-4d8e-b709-77147f50b78a
