@@ -37,7 +37,7 @@ Caliber uses a standard CMake build system.
 
 ```bash
 # Clone the repository
-git clone [https://github.com/Virus2466/caliber.git](https://github.com/Virus2466/caliber.git)
+git clone https://github.com/Virus2466/caliber.git
 cd caliber
 
 mkdir build
