@@ -6,7 +6,8 @@
 
 Caliber is a lightweight, performance-focused 3D graphics framework written in modern C++20. It serves as a testbed for Physically Based Rendering (PBR), procedural animation, and custom game engine architecture.
 
-> **Note:** Insert a GIF here showing your gun swaying and firing!
+<img width="800" height="450" alt="caliber-ezgif com-video-to-gif-converter" src="https://github.com/user-attachments/assets/4a13e55d-2859-4be9-a04c-5f762048cc18" />
+
 
 ## Core Features
 * **Physically Based Rendering (PBR):** Full metallic/roughness workflow with HDR lighting support.
