@@ -1,11 +1,30 @@
-# Caliber
-<img width="1774" height="407" alt="caliber" src="https://github.com/user-attachments/assets/3f59f587-dfff-45b5-aa14-cd499c839704" />
-Engine built from scratch in C++and OpenGL 4.6.
+# Caliber Graphics Framework
 
+![C++20](https://img.shields.io/badge/C++-20-blue.svg)
+![OpenGL](https://img.shields.io/badge/OpenGL-4.6-green.svg)
+![License](https://img.shields.io/badge/License-MIT-purple.svg)
 
+Caliber is a lightweight, performance-focused 3D graphics framework written in modern C++20. It serves as a testbed for Physically Based Rendering (PBR), procedural animation, and custom game engine architecture.
 
+> **Note:** Insert a GIF here showing your gun swaying and firing!
 
----
+## Core Features
+* **Physically Based Rendering (PBR):** Full metallic/roughness workflow with HDR lighting support.
+* **Complex Model Loading:** Integrates `Assimp` to parse `glTF` nodes, meshes, and hierarchical transformations.
+* **Procedural Animation System:** Mathematical, frame-independent animation controller handling weapon recoil, slide mechanics, and magazine drops.
+* **FPS Viewmodel Physics:** Features a spring-based viewmodel sway system that reacts to mouse delta for heavy, realistic weapon handling.
+* **Dynamic Lighting:** Real-time muzzle flashes tied directly to the weapon's local coordinate space.
+* **ImGui Integration:** Real-time debugging and parameter tuning for materials, transforms, and lights.
+
+## Build Instructions (CMake)
+Caliber uses a standard CMake build system.
+
+```bash
+mkdir build
+cd build
+cmake ..
+cmake --build .
+```
 
 ## Gallery
 
@@ -14,34 +33,4 @@ Engine built from scratch in C++and OpenGL 4.6.
 <img width="1274" height="716" alt="Screenshot 2026-05-26 124959" src="https://github.com/user-attachments/assets/ab84fb5b-3945-49bf-b041-cda47381b129" />
 
 
-## Features
-- PBR rendering - Cook-Torrance BRDF
-- GLTF model loading via Assimp
-- Normal mapping + multiple light types
-- Skeletal animation with blend trees *(in progress)*
-- First person viewmodel with spring sway *(in progress)*
-- Dear ImGui debug panel
-
-## Stack
-C++· OpenGL 4.6 · GLFW · GLM · Assimp · Dear ImGui
-
-## Build
-```bash
-git clone https://github.com/Virus2466/Caliber.git
-cd Caliber
-git submodule update --init --recursive
-mkdir build && cd build
-cmake .. -G Ninja
-cmake --build .
-```
-
-## Roadmap
-- [x] PBR rendering pipeline
-- [x] GLTF model loading
-- [x] Normal mapping + lighting
-- [ ] Skeletal animation
-- [ ] Gun animations (fire, reload, inspect)
-- [ ] First person viewmodel
-
----
 
