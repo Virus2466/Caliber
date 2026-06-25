@@ -1,4 +1,4 @@
-# Caliber Graphics Framework
+# Caliber 
 
 ![C++20](https://img.shields.io/badge/C++-20-blue.svg)
 ![OpenGL](https://img.shields.io/badge/OpenGL-4.6-green.svg)
@@ -31,7 +31,7 @@ cmake --build .
 
 
 <video width="100%" autoplay loop muted controls>
-  <source src="YOUR_GITHUB_ASSET_LINK_HERE.mp4](https://github.com/user-attachments/assets/1b13a419-2b14-4d8e-b709-77147f50b78a" type="video/mp4">
+  <source src="https://github.com/user-attachments/assets/1b13a419-2b14-4d8e-b709-77147f50b78a" type="video/mp4">
 </video>
 
 
