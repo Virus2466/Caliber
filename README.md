@@ -12,6 +12,9 @@ Caliber is a lightweight, performance-focused 3D graphics framework written in m
 
 <img width="800" height="450" alt="caliber-ezgif com-video-to-gif-converter" src="https://github.com/user-attachments/assets/4a13e55d-2859-4be9-a04c-5f762048cc18" />
 
+<img width="800" height="450" alt="caliber-ezgif com-video-to-gif-converter (222" src="https://github.com/user-attachments/assets/ceb23191-b4ca-43f6-b0bd-12d09da4a056" />
+
+
 ## Stack
 * **Core Language:** C++20 (Utilizing modern features, move semantics, and aggregate initialization)
 * **Graphics API:** OpenGL 4.6 (Core Profile)
