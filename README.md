@@ -12,6 +12,16 @@ Caliber is a lightweight, performance-focused 3D graphics framework written in m
 
 <img width="800" height="450" alt="caliber-ezgif com-video-to-gif-converter" src="https://github.com/user-attachments/assets/4a13e55d-2859-4be9-a04c-5f762048cc18" />
 
+## Stack
+* **Core Language:** C++20 (Utilizing modern features, move semantics, and aggregate initialization)
+* **Graphics API:** OpenGL 4.6 (Core Profile)
+* **Extension Loader:** GLAD (Dynamically loads modern OpenGL functions)
+* **Window & Input:** GLFW 3 (Handles cross-platform window creation, mouse delta capture, and keyboard state)
+* **Mathematics:** GLM (OpenGL Mathematics for matrix transformations, quaternions, and vector calculus)
+* **Asset Pipeline:** Assimp (Open Asset Import Library for parsing complex `.gltf` hierarchies and materials)
+* **GUI / Tooling:** Dear ImGui (Immediate-mode GUI for real-time debugging of PBR materials and lighting states)
+* **Build System:** CMake (Standardized, cross-platform build generation)
+
 
 ## Core Features
 * **Physically Based Rendering (PBR):** Full metallic/roughness workflow with HDR lighting support.
@@ -25,6 +35,10 @@ Caliber is a lightweight, performance-focused 3D graphics framework written in m
 Caliber uses a standard CMake build system.
 
 ```bash
+# Clone the repository
+git clone [https://github.com/Virus2466/caliber.git](https://github.com/Virus2466/caliber.git)
+cd caliber
+
 mkdir build
 cd build
 cmake ..
