@@ -2,7 +2,7 @@
 
 ![C++20](https://img.shields.io/badge/C++-20-blue.svg)
 ![OpenGL](https://img.shields.io/badge/OpenGL-4.6-green.svg)
-![License](https://img.shields.io/badge/License-MIT-purple.svg)
+
 
 Caliber is a lightweight, performance-focused 3D graphics framework written in modern C++20. It serves as a testbed for Physically Based Rendering (PBR), procedural animation, and custom game engine architecture.
 
