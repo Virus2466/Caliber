@@ -166,16 +166,16 @@ int main(){
         static bool s_rWasPressed = false;
 
         // Light Positions and colors
-        glm::vec3 lightPositions[] = {
-            glm::vec3( 0.5f,  0.5f, 0.5f),
-            glm::vec3(-0.5,  0.5f, 0.5f),
-            glm::vec3( 0.0f, -0.3f, 0.3f),
+        glm::vec3 lightPositions[] ={
+            glm::vec3( 10.0f,  15.0f,  20.0f),  // L0: Key Light (Front Right, High)
+            glm::vec3(-15.0f,  -5.0f,  15.0f),  // L1: Fill Light (Front Left, Low)
+            glm::vec3(  0.0f,  20.0f, -15.0f),  // L2: Rim Light (Directly Behind, High)
         };
 
         glm::vec3 lightColors[] = {
-            glm::vec3(8.0f, 8.0f, 8.0f),
-            glm::vec3(8.0f, 8.0f, 8.0f),
-            glm::vec3(8.0f, 8.0f, 8.0f),
+            glm::vec3(400.0f, 380.0f, 350.0f),  // L0: Warm White / High Intensity
+            glm::vec3(100.0f, 150.0f, 250.0f),  // L1: Cool Blue / Low Intensity
+            glm::vec3(500.0f, 500.0f, 500.0f),  // L2: Pure White / Extreme Intensity for Edge Highlight
         };
 
 
@@ -234,7 +234,7 @@ int main(){
 
 
             // clear BOTH buffers at the TOP
-            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            glClearColor(0.05f, 0.06f, 0.08f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             // Add polygon mode here if needed.
 
@@ -359,7 +359,7 @@ int main(){
                       ? glm::vec3(800.0f, 500.0f, 200.0f)  // warm orange flash
                       : glm::vec3(0.0f);               // off
 
-            glm::vec4 localBarrelTip = glm::vec4(0.0f, 3.5f, -2.5f, 1.0f);
+            glm::vec4 localBarrelTip = glm::vec4(0.0f, 3.5f, 8.9f, 1.0f);
             glm::vec3 muzzlePos = glm::vec3(model * localBarrelTip);
 
             shader.setVec3("u_lightPositions[3]", muzzlePos);
