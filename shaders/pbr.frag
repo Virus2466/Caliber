@@ -18,6 +18,10 @@ uniform float u_ao;
 uniform vec3 u_lightPositions[4];
 uniform vec3 u_lightColors[4];
 uniform int u_lightCount;
+// Direction toward the sun; sunlight has no distance attenuation.
+uniform vec3 u_sunDirection;
+uniform vec3 u_sunRadiance;
+uniform float u_exposure;
 
 uniform vec3 u_viewPos;
 
@@ -73,6 +77,22 @@ vec3 fresnelSchilk(float cosTheta , vec3 F0){
     return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta , 0.0 , 1.0),5.0);
 }
 
+// Use the same Cook-Torrance response for point lights and sunlight.
+vec3 evaluateLight(vec3 N, vec3 V, vec3 L, vec3 radiance,
+                   vec3 albedo, float metallic, float roughness, vec3 F0) {
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
+    if (NdotV <= 0.0 || NdotL <= 0.0) return vec3(0.0);
+
+    vec3 H = normalize(V + L);
+    float D = distributionGGX(N, H, roughness);
+    float G = geometrySmith(N, V, L, roughness);
+    vec3 F = fresnelSchilk(max(dot(H, V), 0.0), F0);
+    vec3 specular = (D * G * F) / (4.0 * NdotV * NdotL + 0.0001);
+    vec3 kD = (vec3(1.0) - F) * (1.0 - metallic);
+    return (kD * albedo / PI + specular) * radiance * NdotL;
+}
+
 
 // Main
 void main(){
@@ -92,7 +112,7 @@ void main(){
     vec3 N = normalize(v_normal);
     if (u_hasNormalMap) {
     vec3 tangentNormal = texture(u_normalMap, v_texCoord).rgb * 2.0 - 1.0;
-    N = normalize(v_normal + tangentNormal * 0.5);
+    N = normalize(v_TBN * tangentNormal);
     }
 
 
@@ -107,41 +127,23 @@ void main(){
     // reflectance equation
     vec3 Lo = vec3(0.0);
 
-    for(int i = 0 ; i < u_lightCount; i++){
-        vec3 L = normalize(u_lightPositions[i] - v_fragPos);
-        vec3 H = normalize(V+L);
-
-        // attenuation
-        float distance = length(u_lightPositions[i] - v_fragPos);
-        float attenuation = 1.0 / (distance * distance);
-        vec3 radiance = u_lightColors[i] * attenuation;
-
-        // Cook Torrence BRDF
-        float D = distributionGGX(N,H,roughness);
-        float G = geometrySmith(N,V,L,roughness);
-        vec3 F = fresnelSchilk(max(dot(H,V),0.0),F0);
-
-        // specular
-        vec3 numerator = D * G * F;
-        float denominator = 4.0 * max(dot(N,V),0.0) * max(dot(N,L),0.0) + 0.0001;
-        vec3 specular = numerator / denominator;
-
-
-        // kd -> diffuse contribution
-        vec3 kS = F;
-        vec3 kD = vec3(1.0) - kS;
-        kD *= (1.0 - metallic);
-
-        float NdotL = max(dot(N,L),0.0);
-        Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+    for(int i = 0 ; i < clamp(u_lightCount, 0, 4); i++){
+        vec3 offset = u_lightPositions[i] - v_fragPos;
+        float distanceSquared = max(dot(offset, offset), 0.0001);
+        vec3 L = offset * inversesqrt(distanceSquared);
+        vec3 radiance = u_lightColors[i] / distanceSquared;
+        Lo += evaluateLight(N, V, L, radiance, albedo, metallic, roughness, F0);
     }
+
+    Lo += evaluateLight(N, V, u_sunDirection, u_sunRadiance,
+                        albedo, metallic, roughness, F0);
 
     // ambient
     vec3 ambient = vec3(0.15) * albedo * ao;
     vec3 color = ambient + Lo;
 
     // HDR tonemapping - compress bright values without blowing broad areas to white.
-    color = vec3(1.0) - exp(-color * 0.9);
+    color = vec3(1.0) - exp(-color * u_exposure);
 
     // gamma correction
     color = pow(color , vec3(1.0/2.2));
