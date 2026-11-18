@@ -1,7 +1,4 @@
 /**
- * @file Camera.h
- * @since 20th April 2026
- * @author Dev Patel
  *
  * First person camera for navigating the Caliber scene.
  * Handles movement, mouse look and zoom.

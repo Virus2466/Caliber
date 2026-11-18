@@ -1,7 +1,4 @@
 /**
- * @file Model.h
- * @since 2026
- * @author Dev Patel
  *
  * Loads and manages a 3D model from a GLTF/OBJ file using Assimp.
  * A Model contains multiple Meshes — for example a gun model may have

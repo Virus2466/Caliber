@@ -1,8 +1,3 @@
-/**
- * @file Model.cpp
- * @since 2026
- * @author Dev Patel
- */
 
 #include "renderer/Model.h"
 #include "assimp/material.h"

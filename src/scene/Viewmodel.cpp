@@ -44,6 +44,7 @@ glm::mat4 Viewmodel::getTransform(const glm::vec3& basePosition , const glm::vec
 
     transform = glm::scale(transform , glm::vec3(scale));
 
+
     return transform;
 }
 

@@ -137,7 +137,7 @@ void main(){
     }
 
     // ambient
-    vec3 ambient = vec3(0.15) * albedo * ao;
+    vec3 ambient = vec3(0.18) * albedo * ao;
     vec3 color = ambient + Lo;
 
     // HDR tonemapping - compress bright values without blowing broad areas to white.
