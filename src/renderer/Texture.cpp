@@ -9,7 +9,16 @@
 
 namespace Caliber{
 
-Texture::Texture(const std::filesystem::path& path){
+Texture::Texture(const std::filesystem::path& path, TextureColorSpace colorSpace){
+    // Assimp supplies bottom-left UVs (including for glTF). Upload the bottom row first.
+    stbi_set_flip_vertically_on_load_thread(true);
+    stbi_uc* pixels = stbi_load(path.string().c_str(), &m_width, &m_height, nullptr, STBI_rgb_alpha);
+    if (!pixels) {
+        const char* reason = stbi_failure_reason();
+        std::cerr << "[Texture] Failed to load: " << path << " (" << (reason ? reason : "unknown") << ")\n";
+        return;
+    }
+
     glGenTextures(1,&m_id);
     glBindTexture(GL_TEXTURE_2D , m_id);
 
@@ -21,25 +30,16 @@ Texture::Texture(const std::filesystem::path& path){
     glTexParameteri(GL_TEXTURE_2D , GL_TEXTURE_MIN_FILTER , GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D , GL_TEXTURE_MAG_FILTER , GL_LINEAR);
 
-    // load image(texture file)
-    int channels;
-    stbi_set_flip_vertically_on_load(false);
-    uint8_t* data = stbi_load(path.string().c_str(), &m_width, &m_height, &channels, 0);
-    
-    if(data){
-        GLenum format = (channels == 4) ? GL_RGBA : GL_RGB;
-        glTexImage2D(GL_TEXTURE_2D , 0 , format , m_width , m_height , 0 , format , GL_UNSIGNED_BYTE , data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        m_loaded = true;
-        std::cout << "[Texture] Loaded" << path << "(" << m_width << "x" << m_height << ")\n";
-    } else{
-        const char* reason = stbi_failure_reason();
-        std::cerr << "[Texture] Failed to load : " << path << " (" << (reason ? reason : "unknown") << ")\n";
-        glDeleteTextures(1, &m_id);
-        m_id = 0;
-    }
-
-    stbi_image_free(data);
+    const GLint internalFormat = colorSpace == TextureColorSpace::SRGB ? GL_SRGB8_ALPHA8 : GL_RGBA8;
+    GLint unpackAlignment;
+    glGetIntegerv(GL_UNPACK_ALIGNMENT, &unpackAlignment);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, unpackAlignment);
+    stbi_image_free(pixels);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    m_loaded = true;
+    std::cout << "[Texture] Loaded " << path << " (" << m_width << "x" << m_height << ")\n";
 
 }
 

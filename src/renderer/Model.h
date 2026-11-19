@@ -15,6 +15,9 @@
 #include<string>
 #include<optional>
 #include<filesystem>
+#include <map>
+#include <memory>
+#include <utility>
 
 #include "assimp/material.h"
 #include "glm/fwd.hpp"
@@ -52,6 +55,7 @@ private:
     Model() = default;
     std::vector<MeshInstance>m_meshInstances;
     std::filesystem::path m_directory;
+    std::map<std::pair<std::filesystem::path, TextureColorSpace>, std::shared_ptr<const Texture>> m_textureCache;
 
     void processNode(aiNode* node , const aiScene* scene , const glm::mat4& parentTransform);
     Mesh processMesh(aiMesh* mesh , const aiScene* scene);

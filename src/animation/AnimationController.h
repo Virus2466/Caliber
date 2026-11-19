@@ -61,7 +61,7 @@ public:
 private:
     Model& m_model;
     float m_stateTime {0.0f}; // time in current state
-    AnimState m_state;
+    AnimState m_state{AnimState::Idle};
 
     // individual Parts
     AnimatedPart m_slide;

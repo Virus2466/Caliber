@@ -7,6 +7,7 @@
 #include<iostream>
 
 #include <assimp/Importer.hpp>
+#include <assimp/GltfMaterial.h>
 #include<assimp/scene.h>
 #include<assimp/postprocess.h>
 #include <glm/geometric.hpp>
@@ -71,10 +72,16 @@ namespace Caliber{
 
 
     void Model::draw(Shader& shader,  const glm::mat4& parentTransform) const {
+        GLint frontFace;
+        glGetIntegerv(GL_FRONT_FACE, &frontFace);
+        const GLenum oppositeWinding = frontFace == GL_CCW ? GL_CW : GL_CCW;
         for(const auto& instance  : m_meshInstances){
             glm::mat4 finalTransform = parentTransform * instance.localTransform;
+            const bool reflected = glm::determinant(glm::mat3(finalTransform)) < 0.0f;
+            if (reflected) glFrontFace(oppositeWinding);
             shader.setMat4("u_model", finalTransform);
             instance.mesh.draw(shader);
+            if (reflected) glFrontFace(static_cast<GLenum>(frontFace));
         }
     }
 
@@ -112,10 +119,11 @@ namespace Caliber{
     }
 
 
-    Mesh Model::processMesh(aiMesh* mesh ,[[maybe_unused]] const aiScene* scene){
+    Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene){
         std::vector<Vertex> vertices;
         std::vector<uint32_t> indices;
         std::vector<MeshTexture> textures;
+        MeshMaterial factors;
 
         vertices.reserve(mesh->mNumVertices);
 
@@ -179,6 +187,15 @@ namespace Caliber{
         // Textures
         if(mesh->mMaterialIndex < scene->mNumMaterials){
             aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+            aiColor4D baseColor;
+            if (material->Get(AI_MATKEY_BASE_COLOR, baseColor) == AI_SUCCESS ||
+                material->Get(AI_MATKEY_COLOR_DIFFUSE, baseColor) == AI_SUCCESS) {
+                factors.baseColor = {baseColor.r, baseColor.g, baseColor.b};
+            }
+            material->Get(AI_MATKEY_METALLIC_FACTOR, factors.metallic);
+            material->Get(AI_MATKEY_ROUGHNESS_FACTOR, factors.roughness);
+            material->Get(AI_MATKEY_TWOSIDED, factors.doubleSided);
+            material->Get(AI_MATKEY_GLTF_TEXTURE_SCALE(aiTextureType_NORMALS, 0), factors.normalScale);
 
             // albedo
             size_t prevSize = textures.size();
@@ -201,7 +218,13 @@ namespace Caliber{
                 loadMaterialTextures(material, aiTextureType_DIFFUSE_ROUGHNESS, TextureType::MetallicRoughness, textures);
 
             // AO
-            loadMaterialTextures(material, aiTextureType_AMBIENT_OCCLUSION, TextureType::AO, textures);
+            // The pinned glTF importer stores occlusionTexture in LIGHTMAP with a strength property.
+            if (material->Get(AI_MATKEY_GLTF_TEXTURE_STRENGTH(aiTextureType_LIGHTMAP, 0),
+                              factors.occlusionStrength) == AI_SUCCESS) {
+                loadMaterialTextures(material, aiTextureType_LIGHTMAP, TextureType::AO, textures);
+            } else {
+                loadMaterialTextures(material, aiTextureType_AMBIENT_OCCLUSION, TextureType::AO, textures);
+            }
         }
 
 
@@ -210,7 +233,7 @@ namespace Caliber{
 
         std::cout << "[Model] Mesh : " << mesh->mNumVertices << "vertices, " << indices.size() << " indices\n";
 
-        return Mesh(std::move(vertices) , std::move(indices) , std::move(textures));
+        return Mesh(std::move(vertices), std::move(indices), std::move(textures), factors);
     }
 
     void Model::loadMaterialTextures(aiMaterial* material, aiTextureType type, TextureType texType, std::vector<MeshTexture>& out){
@@ -233,7 +256,14 @@ namespace Caliber{
                 continue;
             }
 
-            out.emplace_back(path.string(), texType);
+            const auto colorSpace = texType == TextureType::Albedo ? TextureColorSpace::SRGB : TextureColorSpace::Linear;
+            auto [entry, inserted] = m_textureCache.try_emplace({path.lexically_normal(), colorSpace});
+            if (inserted) {
+                entry->second = std::make_shared<Texture>(path, colorSpace);
+            }
+            if (entry->second->isLoaded()) {
+                out.push_back({entry->second, texType});
+            }
         }
     }
 

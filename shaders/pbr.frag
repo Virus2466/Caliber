@@ -3,7 +3,7 @@
 in vec3 v_fragPos;
 in vec3 v_normal;
 in vec2 v_texCoord;
-in mat3 v_TBN;
+in vec4 v_tangent;
 
 
 out vec4 FragColor;
@@ -13,6 +13,10 @@ uniform vec3 u_albedo;
 uniform float u_metallic;
 uniform float u_roughness;
 uniform float u_ao;
+uniform vec3 u_baseColorFactor;
+uniform float u_metallicFactor;
+uniform float u_roughnessFactor;
+uniform float u_occlusionStrength;
 
 // Lights
 uniform vec3 u_lightPositions[4];
@@ -24,6 +28,7 @@ uniform vec3 u_viewPos;
 // texture maps
 uniform sampler2D u_albedoMap;
 uniform sampler2D u_normalMap;
+uniform float u_normalScale = 1.0;
 uniform sampler2D u_metallicRoughnessMap;
 uniform sampler2D u_aoMap;
 
@@ -77,10 +82,14 @@ vec3 fresnelSchilk(float cosTheta , vec3 F0){
 // Main
 void main(){
 
-    vec3 albedo = u_hasAlbedoMap ? pow(texture(u_albedoMap , v_texCoord).rgb , vec3(2.2)) : u_albedo;
-    float metallic = u_hasMetallicRoughnessMap ? texture(u_metallicRoughnessMap , v_texCoord).b : u_metallic;
-    float roughness = u_hasMetallicRoughnessMap ? texture(u_metallicRoughnessMap , v_texCoord).g : u_roughness;
-    float ao = u_hasAOMap ? texture(u_aoMap , v_texCoord).r : u_ao;
+    // The sRGB albedo texture decodes during sampling. The other maps are linear data.
+    vec3 albedo = u_albedo * u_baseColorFactor;
+    if (u_hasAlbedoMap) albedo *= texture(u_albedoMap, v_texCoord).rgb;
+    vec2 roughMetal = u_hasMetallicRoughnessMap ? texture(u_metallicRoughnessMap, v_texCoord).gb : vec2(1.0);
+    float metallic = u_metallic * u_metallicFactor * roughMetal.y;
+    float roughness = u_roughness * u_roughnessFactor * roughMetal.x;
+    float ao = u_ao;
+    if (u_hasAOMap) ao *= mix(1.0, texture(u_aoMap, v_texCoord).r, u_occlusionStrength);
 
     metallic = clamp(metallic, 0.0, 1.0);
     roughness = clamp(roughness, 0.18, 1.0);
@@ -91,9 +100,18 @@ void main(){
 
     vec3 N = normalize(v_normal);
     if (u_hasNormalMap) {
-    vec3 tangentNormal = texture(u_normalMap, v_texCoord).rgb * 2.0 - 1.0;
-    N = normalize(v_normal + tangentNormal * 0.5);
+        vec3 tangentNormal = texture(u_normalMap, v_texCoord).rgb * 2.0 - 1.0;
+        tangentNormal.xy *= u_normalScale;
+        vec3 T = v_tangent.xyz - N * dot(N, v_tangent.xyz);
+        float lengthSquared = dot(T, T);
+        if (lengthSquared > 1e-10 && abs(v_tangent.w) > 0.5) {
+            T *= inversesqrt(lengthSquared);
+            vec3 B = sign(v_tangent.w) * cross(N, T);
+            vec3 mappedNormal = mat3(T, B, N) * tangentNormal;
+            if (dot(mappedNormal, mappedNormal) > 1e-10) N = normalize(mappedNormal);
+        }
     }
+    if (!gl_FrontFacing) N = -N;
 
 
     vec3 V = normalize(u_viewPos - v_fragPos);

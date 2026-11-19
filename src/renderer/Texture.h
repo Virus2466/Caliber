@@ -6,9 +6,12 @@
 
 namespace Caliber{
 
+enum class TextureColorSpace { Linear, SRGB };
+
 class Texture{
     public:
-        explicit Texture(const std::filesystem::path& path);
+        explicit Texture(const std::filesystem::path& path,
+                         TextureColorSpace colorSpace = TextureColorSpace::Linear);
         ~Texture();
 
         // Non copyable

@@ -156,9 +156,9 @@ int main(){
         glm::vec3 modelPosition(0.0f,0.0f,0.0f);
         glm::vec3 modelRotation(0.0f,0.0f,0.0f);
         float modelScale = 1.0f;
-        static glm::vec3 albedo(0.8f,0.8f,0.8f);
-        static float metallic = 0.9f;
-        static float roughness = 0.2f;
+        static glm::vec3 albedo(1.0f);
+        static float metallic = 1.0f;
+        static float roughness = 1.0f;
         static float ao = 1.0f;
 
         // fire/reload inputs
@@ -258,7 +258,7 @@ int main(){
                 ImGui::SliderFloat("Scale", &modelScale, 0.01f, 100.0f);
                 ImGui::Separator();
 
-                ImGui::Text("PBR MATERIAL");
+                ImGui::Text("PBR material multipliers");
                 ImGui::ColorEdit3("Albedo", &albedo.x);
                 ImGui::SliderFloat("Metallic",  &metallic,0.0f, 1.0f);
                 ImGui::SliderFloat("Roughness",      &roughness,  0.0f, 1.0f);
