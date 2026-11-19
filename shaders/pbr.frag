@@ -16,7 +16,6 @@ uniform float u_ao;
 uniform vec3 u_baseColorFactor;
 uniform float u_metallicFactor;
 uniform float u_roughnessFactor;
-uniform float u_normalScale;
 uniform float u_occlusionStrength;
 
 // Lights
@@ -29,6 +28,7 @@ uniform vec3 u_viewPos;
 // texture maps
 uniform sampler2D u_albedoMap;
 uniform sampler2D u_normalMap;
+uniform float u_normalScale = 1.0;
 uniform sampler2D u_metallicRoughnessMap;
 uniform sampler2D u_aoMap;
 
