@@ -3,7 +3,7 @@
 in vec3 v_fragPos;
 in vec3 v_normal;
 in vec2 v_texCoord;
-in mat3 v_TBN;
+in vec4 v_tangent;
 
 
 out vec4 FragColor;
@@ -28,6 +28,7 @@ uniform vec3 u_viewPos;
 // texture maps
 uniform sampler2D u_albedoMap;
 uniform sampler2D u_normalMap;
+uniform float u_normalScale = 1.0;
 uniform sampler2D u_metallicRoughnessMap;
 uniform sampler2D u_aoMap;
 
@@ -111,9 +112,18 @@ void main(){
 
     vec3 N = normalize(v_normal);
     if (u_hasNormalMap) {
-    vec3 tangentNormal = texture(u_normalMap, v_texCoord).rgb * 2.0 - 1.0;
-    N = normalize(v_TBN * tangentNormal);
+        vec3 tangentNormal = texture(u_normalMap, v_texCoord).rgb * 2.0 - 1.0;
+        tangentNormal.xy *= u_normalScale;
+        vec3 T = v_tangent.xyz - N * dot(N, v_tangent.xyz);
+        float lengthSquared = dot(T, T);
+        if (lengthSquared > 1e-10 && abs(v_tangent.w) > 0.5) {
+            T *= inversesqrt(lengthSquared);
+            vec3 B = sign(v_tangent.w) * cross(N, T);
+            vec3 mappedNormal = mat3(T, B, N) * tangentNormal;
+            if (dot(mappedNormal, mappedNormal) > 1e-10) N = normalize(mappedNormal);
+        }
     }
+    if (!gl_FrontFacing) N = -N;
 
 
     vec3 V = normalize(u_viewPos - v_fragPos);
@@ -139,7 +149,7 @@ void main(){
                         albedo, metallic, roughness, F0);
 
     // ambient
-    vec3 ambient = vec3(0.15) * albedo * ao;
+    vec3 ambient = vec3(0.18) * albedo * ao;
     vec3 color = ambient + Lo;
 
     // HDR tonemapping - compress bright values without blowing broad areas to white.

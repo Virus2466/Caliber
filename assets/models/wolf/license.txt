@@ -1,0 +1,11 @@
+Model Information:
+* title:	GUN
+* source:	https://sketchfab.com/3d-models/gun-307770424e1044229b8ac455cd31fcd1
+* author:	NksXxX (https://sketchfab.com/NksXxX)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "GUN" (https://sketchfab.com/3d-models/gun-307770424e1044229b8ac455cd31fcd1) by NksXxX (https://sketchfab.com/NksXxX) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

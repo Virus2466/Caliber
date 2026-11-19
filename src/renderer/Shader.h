@@ -1,8 +1,4 @@
 /** 
-* @file Shader.h
- * @since 20th April 2026
- * @author Dev Patel
- *
  * Shader class responsible for loading , compiling and managing
  * OpenGL GLSL shader programs on the GPU.
  *

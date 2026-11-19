@@ -139,7 +139,7 @@ int main(){
 
         // Load Model
         auto gunModel = Caliber::Model::load(
-            std::filesystem::current_path() / "assets" / "models" / "m19" / "scene.gltf"
+            std::filesystem::current_path() / "assets" / "models" / "wolf" / "scene.gltf"
         );
         if(!gunModel){
             std::cerr << "Failed to Load gun model\n";
@@ -172,15 +172,15 @@ int main(){
 
         // Light Positions and colors
         glm::vec3 lightPositions[] ={
-            glm::vec3( 10.0f,  15.0f,  20.0f),  // L0: Key Light (Front Right, High)
-            glm::vec3(-15.0f,  -5.0f,  15.0f),  // L1: Fill Light (Front Left, Low)
-            glm::vec3(  0.0f,  20.0f, -15.0f),  // L2: Rim Light (Directly Behind, High)
+            glm::vec3( 10.0f,  15.0f,  20.0f),  
+            glm::vec3(-15.0f,  -5.0f,  15.0f),  
+            glm::vec3(  0.0f,  20.0f, -15.0f),  
         };
 
         glm::vec3 lightColors[] = {
-            glm::vec3(400.0f, 380.0f, 350.0f),  // L0: Warm White / High Intensity
-            glm::vec3(100.0f, 150.0f, 250.0f),  // L1: Cool Blue / Low Intensity
-            glm::vec3(500.0f, 500.0f, 500.0f),  // L2: Pure White / Extreme Intensity for Edge Highlight
+            glm::vec3(400.0f, 380.0f, 350.0f),  
+            glm::vec3(100.0f, 150.0f, 250.0f),  
+            glm::vec3(500.0f, 500.0f, 500.0f),  
         };
 
 

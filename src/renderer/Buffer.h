@@ -1,6 +1,4 @@
 /**
- * @since 20th April 2026
- * @author Dev Patel.
  * -- Buffer Class to reduce the vertices that send to the GPU , that is important for our task that is handling large vertices.
  * -- And it is also simplifying the main file.
  */
