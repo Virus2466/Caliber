@@ -15,6 +15,8 @@
 #include <imgui.h>
 #include "animation/AnimationController.h"
 #include "scene/Viewmodel.h"
+#include "renderer/SkyRenderer.h"
+#include "scene/Sun.h"
 
 
 
@@ -130,6 +132,9 @@ int main(){
 
         // ------------------- SHADER ------------------ 
         Caliber::Shader shader("shaders/pbr.vert" , "shaders/pbr.frag");
+        Caliber::SkyRenderer sky;
+        Caliber::Sun sun;
+        float exposure = 0.9f;
 
 
         // Load Model
@@ -151,7 +156,7 @@ int main(){
       
         
         // State Variables
-        float lastFrame = 0.0f;
+        float lastFrame = static_cast<float>(glfwGetTime());
         bool s_tabWasPressed = false;
         glm::vec3 modelPosition(0.0f,0.0f,0.0f);
         glm::vec3 modelRotation(0.0f,0.0f,0.0f);
@@ -189,6 +194,16 @@ int main(){
             float currentFrame = static_cast<float>(glfwGetTime());
             float deltaTime    = currentFrame - lastFrame;
             lastFrame          = currentFrame;
+
+            int framebufferWidth = 0;
+            int framebufferHeight = 0;
+            glfwGetFramebufferSize(window, &framebufferWidth, &framebufferHeight);
+            if (framebufferWidth == 0 || framebufferHeight == 0) {
+                glfwWaitEvents();
+                lastFrame = static_cast<float>(glfwGetTime());
+                continue;
+            }
+            glViewport(0, 0, framebufferWidth, framebufferHeight);
 
             // -------------- KEYBOARD INPUT -----------------
             bool tabPressed = glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS;
@@ -295,6 +310,16 @@ int main(){
                 ImGui::SliderFloat3("Position##L2" , &lightPositions[2].x , -50.0f , 50.0f);
                 ImGui::SliderFloat3("Color##L2" , &lightColors[2].x, 0.0f, 10.0f);
 
+                ImGui::Separator();
+                ImGui::Text("Sun & Sky");
+                ImGui::Checkbox("Enable Sun", &sun.enabled);
+                ImGui::SliderFloat("Sun Azimuth", &sun.azimuthDegrees, -180.0f, 180.0f, "%.1f deg");
+                ImGui::SliderFloat("Sun Elevation", &sun.elevationDegrees, -10.0f, 90.0f, "%.1f deg");
+                ImGui::SliderFloat("Sun Radius", &sun.angularRadiusDegrees, 0.1f, 3.0f, "%.2f deg");
+                ImGui::ColorEdit3("Sun Color", &sun.color.x);
+                ImGui::SliderFloat("Sun Intensity", &sun.intensity, 0.0f, 10.0f);
+                ImGui::SliderFloat("Exposure", &exposure, 0.1f, 3.0f);
+
 
 
             ImGui::End();
@@ -329,7 +354,10 @@ int main(){
            
             
             glm::mat4 view       = camera.getViewMatrix();
-            glm::mat4 projection = camera.getProjectionMatrix(1920.0f / 1080.0f);
+            glm::mat4 projection = camera.getProjectionMatrix(
+                static_cast<float>(framebufferWidth) / static_cast<float>(framebufferHeight));
+
+            sky.draw(view, projection, sun, exposure);
 
             shader.bind();
             // Matrices & View
@@ -338,6 +366,9 @@ int main(){
             shader.setFloat("u_metallic" , metallic);
             shader.setFloat("u_roughness",roughness);
             shader.setFloat("u_ao" ,ao);
+            shader.setVec3("u_sunDirection", sun.getDirection());
+            shader.setVec3("u_sunRadiance", sun.getRadiance());
+            shader.setFloat("u_exposure", exposure);
             // shader.setInt("u_lightCount",3);
             shader.setMat4("u_model",      model);
             shader.setMat4("u_view",       view);

@@ -33,6 +33,7 @@ Caliber is a lightweight, performance-focused 3D rendering engine written in mod
 * **Procedural Animation System:** Mathematical, frame-independent animation controller handling weapon recoil, slide mechanics, and magazine drops.
 * **FPS Viewmodel Physics:** Features a spring-based viewmodel sway system that reacts to mouse delta for heavy, realistic weapon handling.
 * **Dynamic Lighting:** Real-time muzzle flashes tied directly to the weapon's local coordinate space.
+* **Sun and Sky:** Procedural sky with an antialiased sun disc, a soft halo, and matching directional PBR sunlight. The background follows camera rotation and zoom, while remaining independent of camera translation.
 * **ImGui Integration:** Real-time debugging and parameter tuning for materials, transforms, and lights.
 
 ## Build Instructions (CMake)
@@ -40,14 +41,33 @@ Caliber uses a standard CMake build system.
 
 ```bash
 # Clone the repository
-git clone https://github.com/Virus2466/caliber.git
-cd caliber
+git clone --recurse-submodules https://github.com/Virus2466/Caliber.git
+cd Caliber
 
 mkdir build
 cd build
 cmake ..
 cmake --build .
 ```
+
+For an existing checkout, run `git submodule update --init --recursive` first.
+Run the executable from its output directory so it can find `shaders/` and `assets/`.
+
+## Sun and Sky Controls
+
+Press **Tab** to release the mouse and use **Sun & Sky** in the debug panel.
+Adjust azimuth, elevation, angular radius, color, intensity, and exposure.
+The default sun is above and to the right of the initial camera view.
+Its direction is measured **toward** the sun; azimuth zero faces -Z.
+The same direction and radiance drive the sky and material lighting, and
+sunlight does not use the distance attenuation of the existing point lights.
+**Enable Sun** toggles both the visible sun and its direct lighting.
+
+This is a procedural daylight background with a simple lower hemisphere;
+it does not yet include terrain, cast shadows, atmospheric scattering,
+image-based reflections, or a day/night cycle. The existing studio lights
+and ambient fill remain available. The weapon is currently a world-space
+model; camera-attached arms and weapon rendering are a subsequent step.
 
 ## Gallery
 
